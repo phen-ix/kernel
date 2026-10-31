@@ -25,6 +25,9 @@
 #include "sde_hw_interrupts.h"
 #include "sde_core_irq.h"
 #include "dsi_panel.h"
+#ifdef CONFIG_DRM_MSM_KCAL_CTRL
+#include <linux/slab.h>
+#endif
 
 struct sde_cp_node {
 	u32 property_id;
@@ -1025,6 +1028,91 @@ exit:
 
 }
 
+#ifdef CONFIG_DRM_MSM_KCAL_CTRL
+struct sde_kcal_crtc {
+	struct list_head node;
+	struct drm_crtc *crtc;
+	struct drm_property *pcc_prop;
+	u64 pcc_val;
+	struct drm_property *hsic_prop;
+	u64 hsic_val;
+};
+static LIST_HEAD(sde_kcal_crtcs);
+static DEFINE_MUTEX(sde_kcal_lock);
+static atomic_t sde_kcal_replaying = ATOMIC_INIT(0);
+
+static void sde_cp_kcal_track(struct drm_crtc *crtc,
+		struct sde_cp_node *prop_node, struct drm_property *property,
+		uint64_t val)
+{
+	struct sde_kcal_crtc *kc;
+
+	if (prop_node->feature != SDE_CP_CRTC_DSPP_PCC &&
+	    prop_node->feature != SDE_CP_CRTC_DSPP_HSIC)
+		return;
+	if (atomic_read(&sde_kcal_replaying))
+		return;
+	mutex_lock(&sde_kcal_lock);
+	list_for_each_entry(kc, &sde_kcal_crtcs, node) {
+		if (kc->crtc == crtc)
+			goto found;
+	}
+	kc = kzalloc(sizeof(*kc), GFP_KERNEL);
+	if (!kc) {
+		mutex_unlock(&sde_kcal_lock);
+		return;
+	}
+	kc->crtc = crtc;
+	list_add_tail(&kc->node, &sde_kcal_crtcs);
+found:
+	if (prop_node->feature == SDE_CP_CRTC_DSPP_PCC) {
+		kc->pcc_prop = property;
+		kc->pcc_val = val;
+	} else {
+		kc->hsic_prop = property;
+		kc->hsic_val = val;
+	}
+	mutex_unlock(&sde_kcal_lock);
+}
+
+void sde_cp_kcal_force_update(void)
+{
+	struct sde_kcal_crtc *kc;
+
+	atomic_set(&sde_kcal_replaying, 1);
+	mutex_lock(&sde_kcal_lock);
+	list_for_each_entry(kc, &sde_kcal_crtcs, node) {
+		if (kc->pcc_prop)
+			sde_cp_crtc_set_property(kc->crtc, kc->pcc_prop,
+					kc->pcc_val);
+		if (kc->hsic_prop)
+			sde_cp_crtc_set_property(kc->crtc, kc->hsic_prop,
+					kc->hsic_val);
+	}
+	mutex_unlock(&sde_kcal_lock);
+	atomic_set(&sde_kcal_replaying, 0);
+}
+
+static void sde_cp_kcal_crtc_destroy(struct drm_crtc *crtc)
+{
+	struct sde_kcal_crtc *kc, *tmp;
+
+	mutex_lock(&sde_kcal_lock);
+	list_for_each_entry_safe(kc, tmp, &sde_kcal_crtcs, node) {
+		if (kc->crtc == crtc) {
+			list_del(&kc->node);
+			kfree(kc);
+		}
+	}
+	mutex_unlock(&sde_kcal_lock);
+}
+#else
+static inline void sde_cp_kcal_track(struct drm_crtc *crtc,
+		struct sde_cp_node *prop_node, struct drm_property *property,
+		uint64_t val) { }
+static inline void sde_cp_kcal_crtc_destroy(struct drm_crtc *crtc) { }
+#endif
+
 int sde_cp_crtc_set_property(struct drm_crtc *crtc,
 				struct drm_property *property,
 				uint64_t val)
@@ -1057,6 +1145,8 @@ int sde_cp_crtc_set_property(struct drm_crtc *crtc,
 		ret = -ENOENT;
 		goto exit;
 	}
+
+	sde_cp_kcal_track(crtc, prop_node, property, val);
 
 	/**
 	 * sde_crtc is virtual ensure that hardware has been attached to the
@@ -1152,6 +1242,8 @@ void sde_cp_crtc_destroy_properties(struct drm_crtc *crtc)
 {
 	struct sde_crtc *sde_crtc = NULL;
 	struct sde_cp_node *prop_node = NULL, *n = NULL;
+
+	sde_cp_kcal_crtc_destroy(crtc);
 
 	if (!crtc) {
 		DRM_ERROR("invalid crtc %pK\n", crtc);

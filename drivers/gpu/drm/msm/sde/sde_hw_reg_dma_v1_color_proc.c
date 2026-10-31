@@ -14,6 +14,9 @@
 #include "sde_hw_reg_dma_v1_color_proc.h"
 #include "sde_hw_color_proc_common_v4.h"
 #include "sde_hw_ctl.h"
+#ifdef CONFIG_DRM_MSM_KCAL_CTRL
+#include "sde_hw_kcal_ctrl.h"
+#endif
 #include "sde_hw_sspp.h"
 #include "sde_hwio.h"
 
@@ -1012,6 +1015,9 @@ void reg_dmav1_setup_dspp_pccv4(struct sde_hw_dspp *ctx, void *cfg)
 		data[i + 3] = coeffs->r;
 		data[i + 6] = coeffs->g;
 		data[i + 9] = coeffs->b;
+#ifdef CONFIG_DRM_MSM_KCAL_CTRL
+		sde_hw_kcal_pcc_adjust(data, i);
+#endif
 		data[i + 12] = coeffs->rg;
 		data[i + 15] = coeffs->rb;
 		data[i + 18] = coeffs->gb;
@@ -1055,6 +1061,9 @@ void reg_dmav1_setup_dspp_pa_hsicv17(struct sde_hw_dspp *ctx, void *cfg)
 	struct sde_hw_cp_cfg *hw_cfg = cfg;
 	struct sde_reg_dma_setup_ops_cfg dma_write_cfg;
 	struct drm_msm_pa_hsic *hsic_cfg;
+#ifdef CONFIG_DRM_MSM_KCAL_CTRL
+	struct drm_msm_pa_hsic hsic_copy;
+#endif
 	u32 reg = 0, opcode = 0, local_opcode = 0;
 	int rc;
 
@@ -1080,6 +1089,11 @@ void reg_dmav1_setup_dspp_pa_hsicv17(struct sde_hw_dspp *ctx, void *cfg)
 	}
 
 	hsic_cfg = hw_cfg->payload;
+#ifdef CONFIG_DRM_MSM_KCAL_CTRL
+	hsic_copy = *hsic_cfg;
+	sde_hw_kcal_hsic_combine(&hsic_copy);
+	hsic_cfg = &hsic_copy;
+#endif
 
 	dma_ops = sde_reg_dma_get_ops();
 	dma_ops->reset_reg_dma_buf(dspp_buf[HSIC][ctx->idx]);
