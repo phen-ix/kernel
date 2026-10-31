@@ -2,7 +2,7 @@
 # Package the verified miatoll kernel artifacts into an AnyKernel3 flashable ZIP.
 #
 # Inputs:  out/miatoll/artifacts/{Image,cust-atoll-ab.dtb,*-overlay.dtbo,...}
-# Output:  out/miatoll/anykernel/AnyKernel3-miatoll-<short-sha>.zip
+# Output:  out/miatoll/anykernel/DOOM-Kernel-miatoll-<short-sha>.zip
 #
 # Device layout (mi-atoll/device_xiaomi_miatoll @ 17-volt, BoardConfig.mk):
 #   A-only (AB_OTA_UPDATER := false), boot header v2, page size 4096,
@@ -109,12 +109,12 @@ cp "$WORK/dtbo.img" "$STAGE/dtbo.img"
 
 # Device-specific installer script.
 cat > "$STAGE/anykernel.sh" <<'EOF'
-### AnyKernel3 Ramdisk Mod Script — miatoll (KCal-free, Clang 18)
+### DOOM Kernel — AnyKernel3 installer for miatoll (KCal-free, Clang 18)
 ## Device: Xiaomi Redmi Note 9 Pro / 9S / 9 Pro Max / Poco M2 Pro (miatoll)
 ## Layout: A-only, boot header v2, DTB-in-boot, separate DTBO partition.
 
 properties() { '
-kernel.string=phen-ix miatoll kernel (Clang 18, KCal-free)
+kernel.string=DOOM Kernel | miatoll (Clang 18, KCal-free)
 do.devicecheck=1
 do.modules=0
 do.systemless=0
@@ -141,6 +141,8 @@ PATCH_VBMETA_FLAG=0;
 
 . tools/ak3-core.sh;
 
+ui_print "Installing DOOM Kernel for miatoll";
+
 dump_boot;
 write_boot;
 ### end install
@@ -148,7 +150,8 @@ EOF
 
 # Build metadata for the flashable package.
 {
-  echo "PACKAGE=AnyKernel3-miatoll-${SHORT_SHA}"
+  echo "PROJECT=DOOM Kernel"
+  echo "PACKAGE=DOOM-Kernel-miatoll-${SHORT_SHA}"
   echo "KERNEL_SOURCE_COMMIT=$SOURCE_SHA"
   echo "DEVICE=miatoll (curtana/joyeuse/excalibur/gram)"
   echo "ANDROID_TARGET=17 (VoltageOS 6.2)"
@@ -166,7 +169,7 @@ EOF
 } > "$STAGE/PACKAGE_INFO.txt"
 
 cat > "$STAGE/README.txt" <<EOF
-AnyKernel3 flashable kernel — miatoll (KCal-free)
+DOOM Kernel — miatoll AnyKernel3 flashable ZIP (KCal-free)
 =================================================
 Kernel source commit: $SOURCE_SHA
 Toolchain: Android Clang/LLD 18.0.1 (LLVM=1 LLVM_IAS=1)
@@ -198,7 +201,7 @@ stability-certified release.
 EOF
 
 # Create the ZIP (store updater-script uncompressed is not required; deflate all).
-ZIP_NAME="AnyKernel3-miatoll-${SHORT_SHA}.zip"
+ZIP_NAME="DOOM-Kernel-miatoll-${SHORT_SHA}.zip"
 ZIP_PATH="$AK_OUT/$ZIP_NAME"
 rm -f "$ZIP_PATH"
 (cd "$STAGE" && python3 - "$ZIP_PATH" <<'PY'
@@ -236,5 +239,5 @@ print('ZIP structure verification: PASS')
 PY
 
 sha256sum "$ZIP_PATH" > "$ZIP_PATH.sha256"
-echo "AnyKernel3 package: $ZIP_PATH"
+echo "DOOM Kernel package: $ZIP_PATH"
 echo "SHA-256: $(cut -d' ' -f1 "$ZIP_PATH.sha256")"

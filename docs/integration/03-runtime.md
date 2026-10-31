@@ -1,4 +1,4 @@
-# Runtime validation checklist (miatoll / VoltageOS 6.2 / Android 17)
+# DOOM Kernel — runtime validation checklist (miatoll / VoltageOS 6.2 / Android 17)
 
 The kernel branch is build-verified only. Before calling it stable, test on a
 recoverable device with a known-good boot image and working fastboot/EDL path.

@@ -1,4 +1,4 @@
-# Phase 2 — feature integration record
+# DOOM Kernel — Phase 2 feature integration record
 
 Branch: `arena/2197b6cf-kernel` (original branch `16` untouched).
 

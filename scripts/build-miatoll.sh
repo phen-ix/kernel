@@ -26,6 +26,7 @@ export LD_LIBRARY_PATH="$BUILDTOOLS_ROOT/linux-x86/lib64${LD_LIBRARY_PATH:+:$LD_
   bc --version | head -1
   echo "ARCH=arm64 SUBARCH=arm64 LLVM=1 LLVM_IAS=1"
   echo "DEFCONFIG=$DEFCONFIG"
+  echo "PROJECT=DOOM Kernel"
   echo "SOURCE_COMMIT=$(git -C "$ROOT" rev-parse HEAD)"
 } | tee "$LOG_DIR/toolchain.txt"
 
@@ -160,6 +161,8 @@ if grep -Eq ' (sde_hw_kcal_|sde_cp_kcal_)' "$OUT_DIR/System.map"; then
 fi
 
 {
+  echo "PROJECT=DOOM Kernel"
+  echo "KERNEL_RELEASE=$(make -s -C "$ROOT" O="$OUT_DIR" ARCH=arm64 kernelrelease)"
   echo "SOURCE_COMMIT=$(git -C "$ROOT" rev-parse HEAD)"
   echo "DEFCONFIG=$DEFCONFIG"
   echo "TOOLCHAIN=Android Clang/LLD 18.0.1 (r522817)"

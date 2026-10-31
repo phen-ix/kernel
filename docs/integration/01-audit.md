@@ -1,4 +1,4 @@
-# Phase 1 — miatoll / VoltageOS 6.2 integration audit
+# DOOM Kernel — Phase 1 miatoll / VoltageOS 6.2 integration audit
 
 Audit date: 2026-10-31. **Status: integration gate passed, with device-validation conditions.**
 

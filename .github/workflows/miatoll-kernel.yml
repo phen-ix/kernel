@@ -1,4 +1,4 @@
-name: miatoll kernel (Clang 18)
+name: DOOM Kernel — miatoll (Clang 18)
 
 on:
   push:
@@ -48,28 +48,28 @@ jobs:
         if: steps.cache-llvm.outputs.cache-hit != 'true'
         run: scripts/fetch-llvm.sh
 
-      - name: Build miatoll kernel
+      - name: Build DOOM Kernel for miatoll
         run: scripts/build-miatoll.sh
 
-      - name: Package AnyKernel3 ZIP
+      - name: Package DOOM Kernel AnyKernel3 ZIP
         run: scripts/package-anykernel.sh
 
-      - name: Upload raw kernel artifacts
+      - name: Upload DOOM Kernel raw build artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: miatoll-kernel-clang18-${{ github.sha }}
+          name: DOOM-Kernel-miatoll-raw-${{ github.sha }}
           path: |
             out/miatoll/artifacts/
             out/miatoll/logs/
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Upload AnyKernel3 ZIP
+      - name: Upload DOOM Kernel ZIP
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: miatoll-anykernel-clang18-${{ github.sha }}
+          name: DOOM-Kernel-miatoll-${{ github.sha }}
           path: |
             out/miatoll/anykernel/*.zip
             out/miatoll/anykernel/*.zip.sha256

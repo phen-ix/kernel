@@ -1,4 +1,4 @@
-# Final pre-test integration (2026-10-31)
+# DOOM Kernel — final pre-test integration (2026-10-31)
 
 This is the last source/build step before device testing. It is **not** a
 stability claim: no boot, root, mount, haptic, thermal, Wi-Fi, or performance

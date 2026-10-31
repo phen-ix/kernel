@@ -1,4 +1,4 @@
-# Compile and download the KCal-free miatoll kernel
+# Build and download DOOM Kernel for miatoll
 
 ## Which source to use
 
@@ -17,7 +17,7 @@ built commit `72ccb7e1d`, which still contained KCal.
 ## Option A — compile with GitHub Actions
 
 The workflow is `.github/workflows/miatoll-kernel.yml`, displayed as
-**miatoll kernel (Clang 18)**. A push to `arena/2197b6cf-kernel` starts it
+**DOOM Kernel — miatoll (Clang 18)**. A push to `arena/2197b6cf-kernel` starts it
 automatically. It fetches and checks the pinned toolchain, builds the device
 defconfig, checks required features and KCal absence, audits compiler/linker
 commands, and uploads the outputs and logs.
@@ -36,7 +36,7 @@ commands, and uploads the outputs and logs.
 5. In the run's **Artifacts** section, download:
 
    ```text
-   miatoll-kernel-clang18-<full-commit-sha>
+   DOOM-Kernel-miatoll-raw-<full-commit-sha>
    ```
 
 GitHub downloads this as a ZIP. Inside it are `artifacts/` and `logs/`.
@@ -61,7 +61,7 @@ gh run watch "$RUN_ID" --repo "$REPO" --exit-status
 
 SHA="$(gh run view "$RUN_ID" --repo "$REPO" --json headSha --jq '.headSha')"
 gh run download "$RUN_ID" --repo "$REPO" \
-  --name "miatoll-kernel-clang18-$SHA" \
+  --name "DOOM-Kernel-miatoll-raw-$SHA" \
   --dir ./miatoll-no-kcal
 
 cd miatoll-no-kcal/artifacts
@@ -151,7 +151,7 @@ A recovery-flashable AnyKernel3 ZIP is produced from the same verified
 artifacts. GitHub Actions uploads it as a separate artifact:
 
 ```text
-miatoll-anykernel-clang18-<full-commit-sha>
+DOOM-Kernel-miatoll-<full-commit-sha>
 ```
 
 To build it locally after `scripts/build-miatoll.sh`:
@@ -163,8 +163,8 @@ To build it locally after `scripts/build-miatoll.sh`:
 Output:
 
 ```text
-out/miatoll/anykernel/AnyKernel3-miatoll-<short-sha>.zip
-out/miatoll/anykernel/AnyKernel3-miatoll-<short-sha>.zip.sha256
+out/miatoll/anykernel/DOOM-Kernel-miatoll-<short-sha>.zip
+out/miatoll/anykernel/DOOM-Kernel-miatoll-<short-sha>.zip.sha256
 ```
 
 The ZIP is configured for the unified **miatoll** target
@@ -182,7 +182,7 @@ Verify the package before flashing:
 
 ```bash
 cd out/miatoll/anykernel
-sha256sum -c AnyKernel3-miatoll-<short-sha>.zip.sha256
+sha256sum -c DOOM-Kernel-miatoll-<short-sha>.zip.sha256
 ```
 
 Flash from a custom recovery (TWRP/OrangeFox/Lineage Recovery). Keep a
