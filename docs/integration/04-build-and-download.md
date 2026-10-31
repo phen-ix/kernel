@@ -145,7 +145,51 @@ OUT_DIR="$PWD/out/miatoll-fresh" ./scripts/build-miatoll.sh
 That command's artifacts and logs are under `out/miatoll-fresh/` instead.
 Do not work around a compilation error by disabling a required feature.
 
-## What the download contains
+## Option C — AnyKernel3 flashable ZIP
+
+A recovery-flashable AnyKernel3 ZIP is produced from the same verified
+artifacts. GitHub Actions uploads it as a separate artifact:
+
+```text
+miatoll-anykernel-clang18-<full-commit-sha>
+```
+
+To build it locally after `scripts/build-miatoll.sh`:
+
+```bash
+./scripts/package-anykernel.sh
+```
+
+Output:
+
+```text
+out/miatoll/anykernel/AnyKernel3-miatoll-<short-sha>.zip
+out/miatoll/anykernel/AnyKernel3-miatoll-<short-sha>.zip.sha256
+```
+
+The ZIP is configured for the unified **miatoll** target
+(`curtana`, `joyeuse`, `excalibur`, `gram`) using the device tree's boot
+layout: **A-only**, boot header **v2**, page size **4096**, **DTB in boot**,
+and a **separate DTBO partition**. It replaces the kernel and DTB inside the
+existing boot image, preserves the current boot ramdisk, and flashes a
+matching `dtbo.img` built from the four device overlays. It does not flash a
+ROM, recovery, vbmeta, or modem, and it does not install the optional
+`tcp_bic.ko` / `tcp_htcp.ko` modules.
+
+Verify the package before flashing:
+
+```bash
+cd out/miatoll/anykernel
+sha256sum -c AnyKernel3-miatoll-<short-sha>.zip.sha256
+```
+
+Flash from a custom recovery (TWRP/OrangeFox/Lineage Recovery). Keep a
+known-good `boot.img` and `dtbo.img` backup first. This is a testing build,
+not a runtime-certified release; compilation and ZIP structure checks do not
+prove that the device will boot or that Android 17 userspace will work
+correctly.
+
+## What the raw download contains
 
 ```text
 artifacts/
@@ -164,11 +208,11 @@ logs/
   tool-audit.log
 ```
 
-**This is not a flashable AnyKernel ZIP, `boot.img`, or recovery ZIP.**
-Do not flash the raw `Image` directly to a boot partition. Packaging must
-match the ROM's boot header, ramdisk, cmdline, DTB/DTBO layout, and the
-intended device variant. Use your known-good ROM/kernel packaging flow and
-keep a recovery image before testing.
+**The raw artifact above is not a flashable AnyKernel ZIP, `boot.img`, or
+recovery ZIP.** Do not flash the raw `Image` directly to a boot partition.
+Use the AnyKernel3 package from Option C for recovery flashing, or your
+known-good ROM/kernel packaging flow. Keep a recovery image and boot/dtbo
+backups before testing.
 
 A successful compile/config/tool audit does not prove boot stability,
 Android 17 compatibility, root behavior, scheduler behavior, or BBRv3 runtime

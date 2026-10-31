@@ -51,7 +51,10 @@ jobs:
       - name: Build miatoll kernel
         run: scripts/build-miatoll.sh
 
-      - name: Upload artifacts
+      - name: Package AnyKernel3 ZIP
+        run: scripts/package-anykernel.sh
+
+      - name: Upload raw kernel artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -59,5 +62,16 @@ jobs:
           path: |
             out/miatoll/artifacts/
             out/miatoll/logs/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload AnyKernel3 ZIP
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: miatoll-anykernel-clang18-${{ github.sha }}
+          path: |
+            out/miatoll/anykernel/*.zip
+            out/miatoll/anykernel/*.zip.sha256
           if-no-files-found: warn
           retention-days: 14

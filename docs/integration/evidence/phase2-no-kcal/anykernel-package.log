@@ -1,0 +1,37 @@
+AnyKernel3 packaging verification (local)
+Packaging performed against kernel/build HEAD: ad478db7ea91a90d1f3c8080b3d158f71732a12e
+Kernel source commit: ad478db7ea91a90d1f3c8080b3d158f71732a12e
+
+Device layout source: mi-atoll/device_xiaomi_miatoll @ 17-volt BoardConfig.mk
+  AB_OTA_UPDATER=false, BOARD_BOOT_HEADER_VERSION=2, BOARD_KERNEL_PAGESIZE=4096,
+  BOARD_INCLUDE_DTB_IN_BOOTIMG=true, BOARD_KERNEL_SEPARATED_DTBO=true,
+  TARGET_OTA_ASSERT_DEVICE=curtana,excalibur,gram,joyeuse,miatoll
+
+Pinned packaging inputs:
+  AnyKernel3 osm0sis/AnyKernel3@41f04bdb4ee30a44e429c2c1131d5e8bb32b15f1
+  mkdtboimg LineageOS/android_system_libufdt@df92216e3fc5f3fe289423a7819bd4a5ed3bd443
+
+dtbo.img header:
+dt_table_header:
+               magic = d7b7ab1e
+          total_size = 1050481
+         header_size = 32
+       dt_entry_size = 32
+      dt_entry_count = 4
+   dt_entries_offset = 32
+           page_size = 4096
+             version = 0
+dt_table_entry[0]:
+
+Payload hashes (ZIP member == build artifact):
+bea83b4715c43c70d92e6ba3bc6083a025f87d570c7ef0ca8555c06efe6d527d  .work/anykernel-verify/Image
+bea83b4715c43c70d92e6ba3bc6083a025f87d570c7ef0ca8555c06efe6d527d  out/miatoll/artifacts/Image
+6ae7105b5ad512e40af1f14e53a8c27010b2d7caf0934d53c58cfcc24cc3f239  .work/anykernel-verify/dtb
+6ae7105b5ad512e40af1f14e53a8c27010b2d7caf0934d53c58cfcc24cc3f239  out/miatoll/artifacts/cust-atoll-ab.dtb
+
+ZIP SHA-256:
+37f01e41894a1481a738cab5a8773ed1b6e30ce9004fa772d5bfa05ac8f543b0  /home/user/kernel/out/miatoll/anykernel/AnyKernel3-miatoll-ad478db7e.zip
+
+Checks: artifact SHA256SUMS OK; KCal config absent; ZIP testzip OK; required members present;
+        anykernel.sh/update-binary/ak3-core.sh syntax OK; executable modes preserved.
+Runtime/recovery flashing tested: no
