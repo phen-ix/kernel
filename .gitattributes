@@ -1,2 +1,5 @@
 *.c   diff=cpp
 *.h   diff=cpp
+
+# Vendored xxBackslashKSU upstream snapshot: preserve byte-for-byte.
+drivers/kernelsu/** -whitespace

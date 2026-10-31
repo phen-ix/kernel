@@ -191,3 +191,6 @@ obj-$(CONFIG_ESOC)              += esoc/
 # GNSS driver
 obj-$(CONFIG_GNSS_SIRF)		+= gnsssirf/
 obj-$(CONFIG_GNSS)		+= gnss/
+
+# xxBackslashKSU (backslashxx/KernelSU), pinned legacy ARM64 integration.
+obj-$(CONFIG_KSU) += kernelsu/
