@@ -44,6 +44,10 @@ if grep -q '^CONFIG_DRM_MSM_KCAL_CTRL=' "$ARTIFACT_DIR/miatoll.config"; then
   die "KCal is enabled in miatoll.config; this package is for the KCal-free kernel"
 fi
 grep -q '^CONFIG_DRM_MSM=y' "$ARTIFACT_DIR/miatoll.config" || die "CONFIG_DRM_MSM=y not found"
+grep -q '^CONFIG_NOMOUNT=y' "$ARTIFACT_DIR/miatoll.config" || die "CONFIG_NOMOUNT=y not found"
+grep -q '^CONFIG_KSU=y' "$ARTIFACT_DIR/miatoll.config" || die "CONFIG_KSU=y not found"
+grep -q '^CONFIG_MEMCG=y' "$ARTIFACT_DIR/miatoll.config" || die "CONFIG_MEMCG=y not found"
+grep -q '^CONFIG_FAIR_GROUP_SCHED=y' "$ARTIFACT_DIR/miatoll.config" || die "CONFIG_FAIR_GROUP_SCHED=y not found"
 
 for f in "${DTBO_FILES[@]}"; do
   [[ -f "$ARTIFACT_DIR/$f" ]] || die "Missing DTBO: $f"
@@ -153,6 +157,10 @@ EOF
   echo "LIBUFDT_COMMIT=$LIBUFDT_COMMIT"
   echo "DTBO_PAGE_SIZE=$DTBO_PAGE_SIZE"
   echo "KCAL=absent"
+  echo "KSU_VERSION=$(sed -n 's/.*-DKSU_VERSION=\([0-9]*\).*/\1/p' "$ROOT/drivers/kernelsu/Makefile" | head -1)"
+  echo "KSU_UAPI_VERSION=$(sed -n 's/^#define KERNEL_SU_UAPI_VERSION \([0-9]*\).*/\1/p' "$ROOT/drivers/kernelsu/include/uapi/supercall.h" | head -1)"
+  echo "NOMOUNT_PROTOCOL=$(sed -n 's/^#define NOMOUNT_BASE_VERSION "\([0-9]*\)".*/\1/p' "$ROOT/fs/nomount/nomount.h" | head -1)"
+  echo "NOMOUNT_UPSTREAM=maxsteeel/nomount v2.2.0"
   echo "RUNTIME_TESTED=no"
   echo "MODULES_INCLUDED=no (tcp_bic/tcp_htcp remain optional raw artifacts)"
 } > "$STAGE/PACKAGE_INFO.txt"
@@ -174,6 +182,9 @@ What this ZIP does:
 What this ZIP does NOT do:
   - It does not flash a ROM, recovery, vbmeta, or modem.
   - It does not include optional tcp_bic.ko / tcp_htcp.ko modules.
+  - NoMount kernel support is built in, but the NoMount userspace metamodule
+    is NOT installed by this ZIP. Install maxsteeel/nomount v2.2.0 (protocol 22)
+    from the KernelSU manager after booting this kernel.
   - It has NOT been runtime-tested on a device. Compilation and packaging
     verification only. Keep a known-good boot/dtbo backup before flashing.
 

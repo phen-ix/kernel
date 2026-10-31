@@ -13,10 +13,12 @@ A successful build is not a runtime guarantee.
 | Host tools | LineageOS android_prebuilts_build-tools | `f61cfbcb609173e1040753a2b9e8fbe8517343f9` | flex/bison/bc/coreutils shims |
 | uclamp reference | darkhz/uclamp `uclamp_4.14` | `bc867bf6c38f72b661bcd0f7006e17c8bfcaa3c3` | adaptation reference only; known cpuset/active-task defects were not copied |
 | uclamp ABI/group reference | AOSP kernel_msm redbull 4.19 | see audit | CPU-controller `cpu.uclamp.*` model |
-| xxBackslashKSU | `backslashxx/KernelSU` | `f8aeac629022114d6b366b17048965a28ff398e8` | exact requested upstream, UAPI v6 |
+| xxBackslashKSU | `backslashxx/KernelSU` | `9b74de40162dea776d461c15946aae4064c85e5f` | upstream master snapshot matching the v3.3.1-34 manager generation; `KSU_VERSION=32714`, UAPI v6; only `config KSU` changed to `default n` |
 | BBRv3 algorithm | `google/bbr` `bbrv3-2025-03-18` | `90210de4b779d40496dee0b89081780eeddf2a60` | BBRv3 model, not BBRv1 |
 | BBRv3 mainline compatibility | `stardock/tcp_bbr_modules` | `45731d211025c30702316590f1f01d7aa59811b9` | compatibility/accessor layer only; reviewed against Google source |
 | KCal | removed at the user’s request | Revert of `bd1c180c3` | MSM display sources restored to the pre-integration baseline; no KCal feature is enabled |
+| NoMount | `maxsteeel/nomount` v2.2.0 | `bf1847f98fed382369c43bfd652cd93774b9b8e3` | built-in `fs/nomount`; wire protocol/base version 22; Kconfig `default n` and `depends on KEYS` |
+| AW8624 haptics | `Saamitk/Kinesis` branch `17` | `3d955e5d8187ad8229f7c6932226a2aa565fe30b` | maintained driver from `arshad-jamil33/android_kernel_xiaomi_sm6250@16.2`; two trailing-whitespace lines stripped locally |
 
 ## 1. Pure LLVM build plumbing
 

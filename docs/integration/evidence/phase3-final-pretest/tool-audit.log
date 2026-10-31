@@ -1,0 +1,16 @@
+(cat: 1
+bash: 2
+cat: 1
+clang: 3578
+extract-cert: 1
+genheaders: 1
+ld.lld: 5
+llvm-nm: 1
+llvm-objcopy: 2
+mk_elfconfig: 1
+mkdir: 1
+perl: 2
+pnmtologo: 16
+rm: 836
+true: 4
+PASS: no GNU/non-LLVM tool invocations found in .cmd files

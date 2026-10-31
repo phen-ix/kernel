@@ -1,0 +1,8 @@
+Command: scripts/package-anykernel.sh
+AnyKernel3 pin: 41f04bdb4ee30a44e429c2c1131d5e8bb32b15f1
+libufdt pin: df92216e3fc5f3fe289423a7819bd4a5ed3bd443
+ZIP structure verification: PASS
+    testing: tools/magiskpolicy       OK
+    testing: tools/snapshotupdater_static   OK
+No errors detected in compressed data of out/miatoll/anykernel/AnyKernel3-miatoll-4576a7b41.zip (pre-commit working-tree build).
+b1bbe66319d2b90b7506c5c60a9a97de340b705f9a6a0ca68a094fd017ea45e2  out/miatoll/anykernel/AnyKernel3-miatoll-4576a7b41.zip (pre-commit working-tree build)
