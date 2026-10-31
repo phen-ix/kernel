@@ -129,3 +129,7 @@ kernel/configs/android-*.cfg
 #Ignoring Android.bp link file
 #
 Android.bp
+
+# Local integration build/toolchain scratch (Arena)
+.work/
+out/

@@ -1,0 +1,63 @@
+name: miatoll kernel (Clang 18)
+
+on:
+  push:
+    branches:
+      - 'arena/**'
+      - '16'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    env:
+      TOOLCHAIN_ROOT: ${{ github.workspace }}/.work/toolchain
+      BUILDTOOLS_ROOT: ${{ github.workspace }}/.work/build-tools
+      OUT_DIR: ${{ github.workspace }}/out/miatoll
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Install host build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            bc bison flex libssl-dev libelf-dev cpio curl git xz-utils python3
+
+      - name: Cache pinned LLVM toolchain
+        id: cache-llvm
+        uses: actions/cache@v4
+        with:
+          path: |
+            .work/toolchain
+            .work/build-tools
+          key: llvm-r522817-buildtools-f61cfbcb-${{ runner.os }}
+
+      - name: Fetch and verify pinned toolchain
+        if: steps.cache-llvm.outputs.cache-hit != 'true'
+        run: scripts/fetch-llvm.sh
+
+      - name: Build miatoll kernel
+        run: scripts/build-miatoll.sh
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: miatoll-kernel-clang18-${{ github.sha }}
+          path: |
+            out/miatoll/artifacts/
+            out/miatoll/logs/
+          if-no-files-found: warn
+          retention-days: 14

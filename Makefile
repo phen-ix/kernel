@@ -402,6 +402,28 @@ INSTALLKERNEL  := installkernel
 DEPMOD		= depmod
 PERL		= perl
 PYTHON		= python
+# Pure LLVM/Clang build support for this legacy Kbuild tree.
+# LLVM=1 is a hard requirement for the miatoll integration workflow: override
+# tool variables so a stray environment CROSS_COMPILE cannot select GNU tools.
+ifeq ($(LLVM),1)
+LLVM_IAS	:= 1
+override CC		:= clang
+override HOSTCC		:= clang
+override HOSTCXX	:= clang++
+override LD		:= ld.lld
+override AR		:= llvm-ar
+override NM		:= llvm-nm
+override OBJCOPY	:= llvm-objcopy
+override OBJDUMP	:= llvm-objdump
+override STRIP		:= llvm-strip
+override READELF	:= llvm-readelf
+override AS		:= clang
+override CROSS_COMPILE	:= llvm-
+ifeq ($(ARCH),arm64)
+CLANG_TRIPLE		:= aarch64-linux-gnu-
+endif
+endif
+
 CHECK		= sparse
 
 CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
