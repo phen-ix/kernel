@@ -60,7 +60,7 @@ unsigned long cass_cpu_util(int cpu, int this_cpu, bool sync)
 static __always_inline
 bool cass_cpu_better(const struct cass_cpu_cand *a,
 		     const struct cass_cpu_cand *b, unsigned long p_util,
-		     int this_cpu, int prev_cpu, bool sync)
+		     int this_cpu, int prev_cpu, bool sync, bool latency_sensitive)
 {
 #define cass_cmp(a, b) ({ res = (a) - (b); })
 #define cass_eq(a, b) ({ res = (a) == (b); })
@@ -71,6 +71,10 @@ bool cass_cpu_better(const struct cass_cpu_cand *a,
 		     fits_capacity(p_util, b->cap)))
 		goto done;
 		
+	/* Prefer an idle CPU for latency-sensitive tasks */
+	if (latency_sensitive && cass_cmp(a->exit_lat != 0, b->exit_lat != 0))
+		goto done;
+
 	/* Prefer the current CPU for sync wakes */
 	if (sync && (cass_eq(a->cpu, this_cpu) || !cass_cmp(b->cpu, this_cpu)))
 		goto done;
@@ -110,10 +114,15 @@ static int cass_best_cpu(struct task_struct *p, int prev_cpu, bool sync)
 	struct cpuidle_state *idle_state;
 	bool has_idle = false;
 	unsigned long p_util;
+	bool latency_sensitive;
 	int cidx = 0, cpu;
 
-	/* Get the utilization for this task */
-	p_util = task_util_est(p);
+	/* Get the utilization for this task, including clamp/boost bounds */
+	p_util = boosted_task_util(p);
+	latency_sensitive = uclamp_latency_sensitive(p);
+#ifdef CONFIG_SCHED_TUNE
+	latency_sensitive |= schedtune_prefer_idle(p) > 0;
+#endif
 
 	/*
 	 * Find the best CPU to wake @p on. The RCU read lock is needed for
@@ -171,6 +180,9 @@ static int cass_best_cpu(struct task_struct *p, int prev_cpu, bool sync)
 		curr->cap = capacity_of(cpu);
 
 		/* Calculate the relative utilization for this CPU candidate */
+		curr->util = uclamp_util_with(rq, curr->util, p);
+
+		/* Calculate the relative utilization for this CPU candidate */
 		curr->util = curr->util * SCHED_CAPACITY_SCALE / curr->cap;
 
 		/*
@@ -180,7 +192,7 @@ static int cass_best_cpu(struct task_struct *p, int prev_cpu, bool sync)
 		 */
 		if (best == curr ||
 		    cass_cpu_better(curr, best, p_util, this_cpu, prev_cpu,
-				    sync)) {
+				    sync, latency_sensitive)) {
 			best = curr;
 			cidx ^= 1;
 		}

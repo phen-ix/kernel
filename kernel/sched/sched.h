@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 
 #include <linux/sched.h>
+#include <linux/sched/uclamp.h>
 #include <linux/sched/autogroup.h>
 #include <linux/sched/sysctl.h>
 #include <linux/sched/topology.h>
@@ -364,9 +365,14 @@ struct cfs_bandwidth {
 #endif
 };
 
+
 /* task group related information */
 struct task_group {
 	struct cgroup_subsys_state css;
+
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+	struct uclamp_group uclamp;
+#endif
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
 	/* schedulable entities of this group on each cpu */
@@ -806,6 +812,18 @@ struct rq {
 	unsigned long nr_load_updates;
 	u64 nr_switches;
 
+#ifdef CONFIG_UCLAMP_TASK
+	struct uclamp_rq {
+		unsigned int value;
+		struct uclamp_bucket {
+			unsigned long value : 11;
+			unsigned long tasks : BITS_PER_LONG - 11;
+		} bucket[UCLAMP_BUCKETS];
+	} uclamp[UCLAMP_CNT] ____cacheline_aligned;
+	unsigned int uclamp_flags;
+#define UCLAMP_FLAG_IDLE 0x01
+#endif
+
 	struct cfs_rq cfs;
 	struct rt_rq rt;
 	struct dl_rq dl;
@@ -976,6 +994,29 @@ static inline void update_idle_core(struct rq *rq)
 
 #else
 static inline void update_idle_core(struct rq *rq) { }
+#endif
+
+#ifdef CONFIG_UCLAMP_TASK
+static inline unsigned long uclamp_util_with(struct rq *rq,
+		unsigned long util, struct task_struct *p)
+{
+	unsigned long min_util, max_util;
+
+	if (!uclamp_is_used())
+		return util;
+	min_util = READ_ONCE(rq->uclamp[UCLAMP_MIN].value);
+	max_util = READ_ONCE(rq->uclamp[UCLAMP_MAX].value);
+	if (p) {
+		min_util = max(min_util, uclamp_eff_value(p, UCLAMP_MIN));
+		max_util = max(max_util, uclamp_eff_value(p, UCLAMP_MAX));
+	}
+	if (min_util >= max_util)
+		return min_util;
+	return clamp_t(unsigned long, util, min_util, max_util);
+}
+#else
+static inline unsigned long uclamp_util_with(struct rq *rq,
+		unsigned long util, struct task_struct *p) { return util; }
 #endif
 
 DECLARE_PER_CPU_SHARED_ALIGNED(struct rq, runqueues);
@@ -1718,6 +1759,10 @@ struct sched_class {
 					 struct task_struct *task);
 
 	void (*update_curr) (struct rq *rq);
+
+#ifdef CONFIG_UCLAMP_TASK
+	unsigned int uclamp_enabled;
+#endif
 
 #define TASK_SET_GROUP  0
 #define TASK_MOVE_GROUP	1

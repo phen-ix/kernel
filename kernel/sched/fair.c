@@ -6852,9 +6852,13 @@ boosted_cpu_util(int cpu, struct sched_walt_cpu_load *walt_load)
 	trace_sched_boost_cpu(cpu, util, margin);
 
 	if (sched_feat(SCHEDTUNE_BOOST_UTIL))
-		return util + margin;
-	else
-		return util;
+		util += margin;
+
+	/*
+	 * Apply uclamp as bounds after the legacy schedtune margin.  This
+	 * combines boosts by max/clamp rather than adding a second boost.
+	 */
+	return uclamp_util_with(cpu_rq(cpu), util, NULL);
 }
 
 static inline unsigned long
@@ -6866,9 +6870,9 @@ boosted_task_util(struct task_struct *task)
 	trace_sched_boost_task(task, util, margin);
 
 	if (sched_feat(SCHEDTUNE_BOOST_UTIL))
-		return util + margin;
-	else
-		return util;
+		util += margin;
+
+	return uclamp_task_util(task, util);
 }
 
 static unsigned long cpu_util_without(int cpu, struct task_struct *p);
@@ -12857,6 +12861,9 @@ const struct sched_class fair_sched_class = {
 	.get_rr_interval	= get_rr_interval_fair,
 
 	.update_curr		= update_curr_fair,
+#ifdef CONFIG_UCLAMP_TASK
+	.uclamp_enabled		= 1,
+#endif
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
 	.task_change_group	= task_change_group_fair,

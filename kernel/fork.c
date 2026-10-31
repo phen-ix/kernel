@@ -20,6 +20,7 @@
 #include <linux/sched/numa_balancing.h>
 #include <linux/sched/stat.h>
 #include <linux/sched/task.h>
+#include <linux/sched/uclamp.h>
 #include <linux/sched/task_stack.h>
 #include <linux/sched/cputime.h>
 #include <linux/rtmutex.h>
@@ -2132,6 +2133,7 @@ static __latent_entropy struct task_struct *copy_process(
 
 	proc_fork_connector(p);
 	cgroup_post_fork(p);
+	uclamp_post_fork(p);
 	cgroup_threadgroup_change_end(current);
 	perf_event_fork(p);
 

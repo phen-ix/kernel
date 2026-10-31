@@ -1091,6 +1091,49 @@ config SCHED_AUTOGROUP
 	  desktop applications.  Task group autogeneration is currently based
 	  upon task session.
 
+config UCLAMP_TASK
+	bool "Utilization clamping per task"
+	depends on SMP
+	help
+	  This feature enables the scheduler to track the clamped utilization
+	  of each CPU based on RUNNABLE tasks scheduled on that CPU.
+
+	  With this option, the user can specify the min and max CPU utilization
+	  allowed for RUNNABLE tasks. The max utilization defines the maximum
+	  frequency a task should use while the min utilization defines the
+	  minimum frequency it should use.
+
+	  Both min and max utilization clamp values are hints to the scheduler,
+	  aiming at improving its frequency selection policy, but they do not
+	  enforce or grant any specific bandwidth for tasks.
+
+	  If in doubt, say N.
+
+config UCLAMP_BUCKETS_COUNT
+	int "Number of supported utilization clamp buckets"
+	range 5 20
+	default 5
+	depends on UCLAMP_TASK
+	help
+	  Defines the number of clamp buckets to use. The range of each bucket
+	  will be SCHED_CAPACITY_SCALE/UCLAMP_BUCKETS_COUNT. The higher the
+	  number of clamp buckets the finer their granularity and the higher
+	  the precision of clamping aggregation and tracking at run-time.
+
+	  If in doubt, use the default value.
+
+config UCLAMP_TASK_GROUP
+	bool "Utilization clamping per group of tasks"
+	depends on UCLAMP_TASK && CGROUP_SCHED && CPUSETS
+	default n
+	help
+	  This feature enables utilization clamping for both the CPU controller
+	  (cpu.uclamp.*) and the cpuset controller (uclamp.*), as required by
+	  Android task profiles. The two hierarchies are tracked separately and
+	  combined with task-specific clamps.
+
+	  If in doubt, say N.
+
 config SCHED_TUNE
 	bool "Boosting for CFS tasks (EXPERIMENTAL)"
 	depends on SMP

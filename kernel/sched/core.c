@@ -777,6 +777,7 @@ static inline void enqueue_task(struct rq *rq, struct task_struct *p, int flags)
 		psi_enqueue(p, flags & ENQUEUE_WAKEUP);
 	}
 
+	uclamp_enqueue(rq, p);
 	p->sched_class->enqueue_task(rq, p, flags);
 	walt_update_last_enqueue(p);
 	trace_sched_enq_deq_task(p, 1, cpumask_bits(&p->cpus_allowed)[0]);
@@ -792,6 +793,7 @@ static inline void dequeue_task(struct rq *rq, struct task_struct *p, int flags)
 		psi_dequeue(p, flags & DEQUEUE_SLEEP);
 	}
 
+	uclamp_dequeue(rq, p);
 	p->sched_class->dequeue_task(rq, p, flags);
 #ifdef CONFIG_SCHED_WALT
 	if (p == rq->ed_task)
@@ -2658,6 +2660,8 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 	 */
 	p->prio = current->normal_prio;
 
+	uclamp_fork(p);
+
 	/*
 	 * Revert to default priority/policy on fork if requested.
 	 */
@@ -4423,6 +4427,9 @@ static void __setscheduler_params(struct task_struct *p,
 static void __setscheduler(struct rq *rq, struct task_struct *p,
 			   const struct sched_attr *attr, bool keep_boost)
 {
+	if (attr->sched_flags & SCHED_FLAG_KEEP_PARAMS)
+		return;
+
 	__setscheduler_params(p, attr);
 
 	/*
@@ -4486,7 +4493,9 @@ recheck:
 	}
 
 	if (attr->sched_flags &
-		~(SCHED_FLAG_RESET_ON_FORK | SCHED_FLAG_RECLAIM))
+		~(SCHED_FLAG_RESET_ON_FORK | SCHED_FLAG_RECLAIM |
+		  SCHED_FLAG_KEEP_POLICY | SCHED_FLAG_KEEP_PARAMS |
+		  SCHED_FLAG_UTIL_CLAMP))
 		return -EINVAL;
 
 	/*
@@ -4558,6 +4567,12 @@ recheck:
 			return retval;
 	}
 
+	if (attr->sched_flags & SCHED_FLAG_UTIL_CLAMP) {
+		retval = uclamp_validate(p, attr);
+		if (retval)
+			return retval;
+	}
+
 	/*
 	 * Make sure no PI-waiters arrive (or leave) while we are
 	 * changing the priority of the task:
@@ -4586,6 +4601,8 @@ recheck:
 		if (rt_policy(policy) && attr->sched_priority != p->rt_priority)
 			goto change;
 		if (dl_policy(policy) && dl_param_changed(p, attr))
+			goto change;
+		if (attr->sched_flags & SCHED_FLAG_UTIL_CLAMP)
 			goto change;
 
 		p->sched_reset_on_fork = reset_on_fork;
@@ -4667,6 +4684,7 @@ change:
 
 	prev_class = p->sched_class;
 	__setscheduler(rq, p, attr, pi);
+	uclamp_setattr(p, attr);
 
 	if (queued) {
 		/*
@@ -4889,6 +4907,10 @@ static int sched_copy_attr(struct sched_attr __user *uattr, struct sched_attr *a
 	if (ret)
 		return -EFAULT;
 
+	if ((attr->sched_flags & SCHED_FLAG_UTIL_CLAMP) &&
+	    size < SCHED_ATTR_SIZE_VER1)
+		return -EINVAL;
+
 	/*
 	 * XXX: Do we want to be lenient like existing syscalls; or do we want
 	 * to be strict and return an error on out-of-bounds values?
@@ -4952,13 +4974,29 @@ SYSCALL_DEFINE3(sched_setattr, pid_t, pid, struct sched_attr __user *, uattr,
 
 	if ((int)attr.sched_policy < 0)
 		return -EINVAL;
+	if (attr.sched_flags & SCHED_FLAG_KEEP_POLICY)
+		attr.sched_policy = SETPARAM_POLICY;
 
 	rcu_read_lock();
 	retval = -ESRCH;
 	p = find_process_by_pid(pid);
-	if (p != NULL)
+	if (p != NULL) {
+		get_task_struct(p);
+		if (attr.sched_flags & SCHED_FLAG_KEEP_PARAMS) {
+			attr.sched_nice = task_nice(p);
+			attr.sched_priority = p->rt_priority;
+			if (dl_task(p)) {
+				attr.sched_runtime = p->dl.dl_runtime;
+				attr.sched_deadline = p->dl.dl_deadline;
+				attr.sched_period = p->dl.dl_period;
+			}
+		}
+		rcu_read_unlock();
 		retval = sched_setattr(p, &attr);
-	rcu_read_unlock();
+		put_task_struct(p);
+	} else {
+		rcu_read_unlock();
+	}
 
 	return retval;
 }
@@ -5038,35 +5076,17 @@ static int sched_read_attr(struct sched_attr __user *uattr,
 			   struct sched_attr *attr,
 			   unsigned int usize)
 {
-	int ret;
-
 	if (!access_ok(VERIFY_WRITE, uattr, usize))
 		return -EFAULT;
 
 	/*
-	 * If we're handed a smaller struct than we know of,
-	 * ensure all the unknown bits are 0 - i.e. old
-	 * user-space does not get uncomplete information.
+	 * Forward/backward compatible ABI: copy only the smaller of the
+	 * user and kernel structure sizes.  User-space can detect the
+	 * kernel's knowledge from attr->size.
 	 */
-	if (usize < sizeof(*attr)) {
-		unsigned char *addr;
-		unsigned char *end;
-
-		addr = (void *)attr + usize;
-		end  = (void *)attr + sizeof(*attr);
-
-		for (; addr < end; addr++) {
-			if (*addr)
-				return -EFBIG;
-		}
-
-		attr->size = usize;
-	}
-
-	ret = copy_to_user(uattr, attr, attr->size);
-	if (ret)
+	attr->size = min_t(unsigned int, usize, sizeof(*attr));
+	if (copy_to_user(uattr, attr, attr->size))
 		return -EFAULT;
-
 	return 0;
 }
 
@@ -5109,6 +5129,11 @@ SYSCALL_DEFINE4(sched_getattr, pid_t, pid, struct sched_attr __user *, uattr,
 		attr.sched_priority = p->rt_priority;
 	else
 		attr.sched_nice = task_nice(p);
+
+#ifdef CONFIG_UCLAMP_TASK
+	attr.sched_util_min = p->uclamp_req[UCLAMP_MIN].value;
+	attr.sched_util_max = p->uclamp_req[UCLAMP_MAX].value;
+#endif
 
 	rcu_read_unlock();
 
@@ -6766,6 +6791,9 @@ int in_sched_functions(unsigned long addr)
 }
 
 #ifdef CONFIG_CGROUP_SCHED
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+static struct uclamp_group *cpu_uclamp_get_group(struct cgroup_subsys_state *css);
+#endif
 /*
  * Default task group.
  * Every task in system belongs to this group at bootup.
@@ -6845,6 +6873,8 @@ void __init sched_init(void)
 	INIT_LIST_HEAD(&root_task_group.siblings);
 	autogroup_init(&init_task);
 #endif /* CONFIG_CGROUP_SCHED */
+
+	uclamp_init();
 
 	for_each_possible_cpu(i) {
 		struct rq *rq;
@@ -7194,6 +7224,10 @@ struct task_group *sched_create_group(struct task_group *parent)
 	if (!alloc_rt_sched_group(tg, parent))
 		goto err;
 
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+	uclamp_group_init(&tg->uclamp, &parent->uclamp);
+#endif
+
 	return tg;
 
 err:
@@ -7217,6 +7251,9 @@ void sched_online_group(struct task_group *tg, struct task_group *parent)
 	spin_unlock_irqrestore(&task_group_lock, flags);
 
 	online_fair_sched_group(tg);
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+	uclamp_group_online(&tg->css, cpu_uclamp_get_group);
+#endif
 }
 
 /* rcu callback to free various structures associated with a task group */
@@ -7861,6 +7898,26 @@ static u64 cpu_rt_period_read_uint(struct cgroup_subsys_state *css,
 }
 #endif /* CONFIG_RT_GROUP_SCHED */
 
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+static struct uclamp_group *cpu_uclamp_get_group(struct cgroup_subsys_state *css)
+{
+	return &css_tg(css)->uclamp;
+}
+
+static const struct uclamp_cftype cpu_uclamp_min = {
+	.get_group = cpu_uclamp_get_group,
+	.clamp_id = UCLAMP_MIN,
+};
+static const struct uclamp_cftype cpu_uclamp_max = {
+	.get_group = cpu_uclamp_get_group,
+	.clamp_id = UCLAMP_MAX,
+};
+static const struct uclamp_cftype cpu_uclamp_ls = {
+	.get_group = cpu_uclamp_get_group,
+	.latency_sensitive = true,
+};
+#endif
+
 static struct cftype cpu_files[] = {
 #ifdef CONFIG_FAIR_GROUP_SCHED
 	{
@@ -7895,6 +7952,29 @@ static struct cftype cpu_files[] = {
 		.name = "rt_period_us",
 		.read_u64 = cpu_rt_period_read_uint,
 		.write_u64 = cpu_rt_period_write_uint,
+	},
+#endif
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+	{
+		.name = "uclamp.min",
+		.flags = CFTYPE_NOT_ON_ROOT,
+		.seq_show = uclamp_css_show,
+		.write = uclamp_css_write,
+		.private = (unsigned long)&cpu_uclamp_min,
+	},
+	{
+		.name = "uclamp.max",
+		.flags = CFTYPE_NOT_ON_ROOT,
+		.seq_show = uclamp_css_show,
+		.write = uclamp_css_write,
+		.private = (unsigned long)&cpu_uclamp_max,
+	},
+	{
+		.name = "uclamp.latency_sensitive",
+		.flags = CFTYPE_NOT_ON_ROOT,
+		.read_u64 = uclamp_css_ls_read,
+		.write_u64 = uclamp_css_ls_write,
+		.private = (unsigned long)&cpu_uclamp_ls,
 	},
 #endif
 	{ }	/* Terminate */

@@ -26,6 +26,7 @@
 #include <linux/cpu.h>
 #include <linux/cpumask.h>
 #include <linux/cpuset.h>
+#include <linux/sched/uclamp.h>
 #include <linux/err.h>
 #include <linux/errno.h>
 #include <linux/file.h>
@@ -79,6 +80,10 @@ struct fmeter {
 
 struct cpuset {
 	struct cgroup_subsys_state css;
+
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+	struct uclamp_group uclamp;
+#endif
 
 	unsigned long flags;		/* "unsigned long" so bitops work */
 
@@ -148,6 +153,37 @@ static inline struct cpuset *task_cs(struct task_struct *task)
 {
 	return css_cs(task_css(task, cpuset_cgrp_id));
 }
+
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+struct uclamp_group *uclamp_cpuset_group(struct task_struct *p)
+{
+	struct cgroup_subsys_state *css = task_css_check(p, cpuset_cgrp_id, true);
+	struct cpuset *cs;
+
+	if (!css || !css->parent)
+		return NULL;
+	cs = css_cs(css);
+	return &cs->uclamp;
+}
+
+static struct uclamp_group *cpuset_uclamp_get_group(struct cgroup_subsys_state *css)
+{
+	return &css_cs(css)->uclamp;
+}
+
+static const struct uclamp_cftype cpuset_uclamp_min = {
+	.get_group = cpuset_uclamp_get_group,
+	.clamp_id = UCLAMP_MIN,
+};
+static const struct uclamp_cftype cpuset_uclamp_max = {
+	.get_group = cpuset_uclamp_get_group,
+	.clamp_id = UCLAMP_MAX,
+};
+static const struct uclamp_cftype cpuset_uclamp_ls = {
+	.get_group = cpuset_uclamp_get_group,
+	.latency_sensitive = true,
+};
+#endif
 
 static inline struct cpuset *parent_cs(struct cpuset *cs)
 {
@@ -1578,6 +1614,9 @@ static void cpuset_attach(struct cgroup_taskset *tset)
 
 		cpuset_change_task_nodemask(task, &cpuset_attach_nodemask_to);
 		cpuset_update_task_spread_flag(cs, task);
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+		uclamp_refresh_task(task);
+#endif
 	}
 
 	/*
@@ -1960,6 +1999,26 @@ static struct cftype files[] = {
 		.private = FILE_MEMORY_PRESSURE_ENABLED,
 	},
 
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+	{
+		.name = "uclamp.min",
+		.seq_show = uclamp_css_show,
+		.write = uclamp_css_write,
+		.private = (unsigned long)&cpuset_uclamp_min,
+	},
+	{
+		.name = "uclamp.max",
+		.seq_show = uclamp_css_show,
+		.write = uclamp_css_write,
+		.private = (unsigned long)&cpuset_uclamp_max,
+	},
+	{
+		.name = "uclamp.latency_sensitive",
+		.read_u64 = uclamp_css_ls_read,
+		.write_u64 = uclamp_css_ls_write,
+		.private = (unsigned long)&cpuset_uclamp_ls,
+	},
+#endif
 	{ }	/* terminate */
 };
 
@@ -1994,6 +2053,9 @@ cpuset_css_alloc(struct cgroup_subsys_state *parent_css)
 	nodes_clear(cs->effective_mems);
 	fmeter_init(&cs->fmeter);
 	cs->relax_domain_level = -1;
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+	uclamp_group_init(&cs->uclamp, NULL);
+#endif
 
 	return &cs->css;
 
@@ -2025,6 +2087,9 @@ static int cpuset_css_online(struct cgroup_subsys_state *css)
 		set_bit(CS_SPREAD_SLAB, &cs->flags);
 
 	cpuset_inc();
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+	uclamp_group_online(css, cpuset_uclamp_get_group);
+#endif
 
 	spin_lock_irq(&callback_lock);
 	if (is_in_v2_mode()) {
@@ -2169,6 +2234,9 @@ int __init cpuset_init(void)
 	nodes_setall(top_cpuset.effective_mems);
 
 	fmeter_init(&top_cpuset.fmeter);
+#ifdef CONFIG_UCLAMP_TASK_GROUP
+	uclamp_group_init(&top_cpuset.uclamp, NULL);
+#endif
 	set_bit(CS_SCHED_LOAD_BALANCE, &top_cpuset.flags);
 	top_cpuset.relax_domain_level = -1;
 

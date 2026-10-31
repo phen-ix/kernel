@@ -367,6 +367,23 @@ struct load_weight {
 	u32				inv_weight;
 };
 
+#ifdef CONFIG_UCLAMP_TASK
+#define UCLAMP_BUCKETS CONFIG_UCLAMP_BUCKETS_COUNT
+
+enum uclamp_id {
+	UCLAMP_MIN = 0,
+	UCLAMP_MAX,
+	UCLAMP_CNT
+};
+
+struct uclamp_se {
+	unsigned int value		: 11; /* SCHED_CAPACITY_SCALE */
+	unsigned int bucket_id		: 5; /* UCLAMP_BUCKETS <= 20 */
+	unsigned int active		: 1;
+	unsigned int user_defined	: 1;
+};
+#endif
+
 /**
  * struct util_est - Estimation utilization of FAIR tasks
  * @enqueued: instantaneous estimated utilization of a task/cpu
@@ -799,6 +816,11 @@ struct task_struct {
 	struct task_group		*sched_task_group;
 #endif
 	struct sched_dl_entity		dl;
+
+#ifdef CONFIG_UCLAMP_TASK
+	struct uclamp_se		uclamp_req[UCLAMP_CNT];
+	struct uclamp_se		uclamp[UCLAMP_CNT];
+#endif
 
 #ifdef CONFIG_PREEMPT_NOTIFIERS
 	/* List of struct preempt_notifier: */
