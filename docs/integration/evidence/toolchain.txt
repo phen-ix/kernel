@@ -1,0 +1,11 @@
+Android (11967740, +pgo, +bolt, +lto, +mlgo, based on r522817) clang version 18.0.1 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /home/user/audit-work/llvm-r522817/clang-r522817/bin
+LLD 18.0.1 (compatible with GNU linkers)
+18.0.1
+based on r522817
+for additional information on LLVM revision and cherry-picks, see clang_source_info.md
+5ab8ad3d455ff09c8eb8f4c7dbc70fb5d5396c7910342a18fd68e848b12f749d  /home/user/audit-work/llvm-r522817/clang-r522817/bin/clang-18
+8cc2d6d52e3b53581616ac735549de4afe8e3194ee65ae543cd2230833c0ba91  /home/user/audit-work/llvm-r522817/clang-r522817/bin/lld
+ddbf59740630a74ad2ff30c7c59189a02e01f4f8da138fd78be0afc959348e93  /home/user/audit-work/llvm-r522817/clang-r522817/bin/llvm-ar

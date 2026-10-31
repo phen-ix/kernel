@@ -1,0 +1,66 @@
+--- ELF identity ---
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              DYN (Shared object file)
+  Machine:                           AArch64
+  Version:                           0x1
+  Entry point address:               0xFFFFFF8010080000
+  Start of program headers:          64 (bytes into file)
+  Start of section headers:          57141920 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           56 (bytes)
+  Number of program headers:         23
+  Size of section headers:           64 (bytes)
+  Number of section headers:         42
+  Section header string table index: 40
+String dump of section '.comment':
+[     1] Android (11967740, +pgo, +bolt, +lto, +mlgo, based on r522817) clang version 18.0.1 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)
+[    b8] Linker: LLD 18.0.1
+--- artifact hashes ---
+864f55ac6ec78904d59937ff6bcca353939950d5e77e046ccaac10dc8d2e1dc6  /home/user/audit-work/baseline-out/arch/arm64/boot/Image
+154740711ce93f0c1791b9bf7bbbd012a589b4a3877c60898c960410046d65a9  /home/user/audit-work/baseline-out/vmlinux
+1f3aea3ee2aa4759cb47df84b3884ab67d0c9dbbe634f2cf3d856284388b7103  /home/user/audit-work/baseline-out/.config
+6ae7105b5ad512e40af1f14e53a8c27010b2d7caf0934d53c58cfcc24cc3f239  /home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/cust-atoll-ab.dtb
+5c64d39163454000a0aea0d52b7012f825d72a81999ba6655e2f106e641a6df7  /home/user/audit-work/baseline-out/net/ipv4/tcp_bic.ko
+007718ffa9a8baa105297bf4d9c5a9008b30665e1a7d808621ffe12d7c1ad9d0  /home/user/audit-work/baseline-out/net/ipv4/tcp_htcp.ko
+--- target DTBO files ---
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.curtana-atoll-ab-idp-overlay.dtbo.d.pre.tmp
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.curtana-atoll-ab-idp-overlay.dtbo.d.dtc.tmp
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.curtana-atoll-ab-idp-overlay.dtbo.dts.tmp
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/curtana-atoll-ab-idp-overlay.dtbo
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.excalibur-atoll-ab-idp-overlay.dtbo.d.dtc.tmp
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.curtana-atoll-ab-idp-overlay.dtbo.cmd
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.excalibur-atoll-ab-idp-overlay.dtbo.d.pre.tmp
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.excalibur-atoll-ab-idp-overlay.dtbo.dts.tmp
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/excalibur-atoll-ab-idp-overlay.dtbo
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.excalibur-atoll-ab-idp-overlay.dtbo.cmd
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.gram-atoll-ab-idp-overlay.dtbo.d.dtc.tmp
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.gram-atoll-ab-idp-overlay.dtbo.d.pre.tmp
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.gram-atoll-ab-idp-overlay.dtbo.dts.tmp
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/gram-atoll-ab-idp-overlay.dtbo
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.gram-atoll-ab-idp-overlay.dtbo.cmd
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.joyeuse-atoll-ab-idp-overlay.dtbo.d.dtc.tmp
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.joyeuse-atoll-ab-idp-overlay.dtbo.d.pre.tmp
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.joyeuse-atoll-ab-idp-overlay.dtbo.dts.tmp
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/joyeuse-atoll-ab-idp-overlay.dtbo
+/home/user/audit-work/baseline-out/arch/arm64/boot/dts/qcom/.joyeuse-atoll-ab-idp-overlay.dtbo.cmd
+--- sizes ---
+-rwxr-xr-x 1 user user 41M Oct 31 03:03 /home/user/audit-work/baseline-out/arch/arm64/boot/Image
+-rwxr-xr-x 1 user user 55M Oct 31 03:03 /home/user/audit-work/baseline-out/vmlinux
+--- warnings ---
+/home/user/kernel/mm/vmscan.c:2384:16: warning: mixing declarations and code is a C99 extension [-Wdeclaration-after-statement]
+/home/user/kernel/kernel/sched/cpufreq_schedutil.c:166:15: warning: unused variable 'cpu' [-Wunused-variable]
+/home/user/kernel/drivers/gpu/msm/kgsl_pwrctrl.c:383:15: warning: unused variable 'old_level' [-Wunused-variable]
+/home/user/kernel/drivers/gpu/msm/kgsl_events.c:65:6: warning: unused variable 'id' [-Wunused-variable]
+/home/user/kernel/drivers/gpu/msm/adreno_dispatch.c:279:25: warning: unused variable 'drawctxt' [-Wunused-variable]
+/home/user/kernel/drivers/gpu/msm/adreno_dispatch.c:2313:28: warning: unused variable 'dispatcher' [-Wunused-variable]
+/home/user/kernel/drivers/gpu/msm/adreno_dispatch.c:2315:25: warning: unused variable 'drawctxt' [-Wunused-variable]
+/home/user/kernel/drivers/power/supply/maxim/onewire_gpio.c:476:82: warning: cast to smaller integer type 'uint32_t' (aka 'unsigned int') from 'void *' [-Wvoid-pointer-to-int-cast]
+/home/user/kernel/drivers/power/supply/maxim/onewire_gpio.c:476:122: warning: cast to smaller integer type 'uint32_t' (aka 'unsigned int') from 'void *' [-Wvoid-pointer-to-int-cast]
+/home/user/kernel/drivers/power/supply/qcom/smb1398-charger.c:2418:23: warning: cast to smaller integer type 'int' from 'const void *' [-Wvoid-pointer-to-int-cast]

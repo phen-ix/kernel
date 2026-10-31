@@ -1,0 +1,21 @@
+make -C /home/user/audit-work/baseline-out KBUILD_SRC=/home/user/kernel \
+-f /home/user/kernel/Makefile vendor/xiaomi/miatoll_defconfig
+make[1]: Entering directory '/home/user/audit-work/baseline-out'
+make -f /home/user/kernel/scripts/Makefile.build obj=scripts/basic
+ln -fsn /home/user/kernel source
+/bin/bash /home/user/kernel/scripts/mkmakefile \
+    /home/user/kernel . 4 14
+  GEN     ./Makefile
+  clang -Wp,-MD,scripts/basic/.fixdep.d -Iscripts/basic -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer -std=gnu11 -pipe -Wno-unused-value -Wno-unused-parameter -Wno-missing-field-initializers  -o scripts/basic/fixdep /home/user/kernel/scripts/basic/fixdep.c  
+rm -f .tmp_quiet_recordmcount
+make -f /home/user/kernel/scripts/Makefile.build obj=scripts/kconfig vendor/xiaomi/miatoll_defconfig
+  clang -Wp,-MD,scripts/kconfig/.conf.o.d -Iscripts/kconfig -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer -std=gnu11 -pipe -Wno-unused-value -Wno-unused-parameter -Wno-missing-field-initializers -DCURSES_LOC="<curses.h>" -DLOCALE -c -o scripts/kconfig/conf.o /home/user/kernel/scripts/kconfig/conf.c
+  cat /home/user/kernel/scripts/kconfig/zconf.tab.c_shipped > scripts/kconfig/zconf.tab.c
+  cat /home/user/kernel/scripts/kconfig/zconf.lex.c_shipped > scripts/kconfig/zconf.lex.c
+  clang -Wp,-MD,scripts/kconfig/.zconf.tab.o.d -Iscripts/kconfig -Wall -Wmissing-prototypes -Wstrict-prototypes -O3 -fomit-frame-pointer -std=gnu11 -pipe -Wno-unused-value -Wno-unused-parameter -Wno-missing-field-initializers -DCURSES_LOC="<curses.h>" -DLOCALE  -I/home/user/kernel/scripts/kconfig -c -o scripts/kconfig/zconf.tab.o scripts/kconfig/zconf.tab.c
+  clang  -o scripts/kconfig/conf scripts/kconfig/conf.o scripts/kconfig/zconf.tab.o  
+scripts/kconfig/conf  --defconfig=arch/arm64/configs/vendor/xiaomi/miatoll_defconfig Kconfig
+#
+# configuration written to .config
+#
+make[1]: Leaving directory '/home/user/audit-work/baseline-out'
