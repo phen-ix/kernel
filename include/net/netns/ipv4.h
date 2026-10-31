@@ -176,6 +176,12 @@ struct netns_ipv4 {
 	struct fib_notifier_ops	*notifier_ops;
 	unsigned int	fib_seq;	/* protected by rtnl_mutex */
 
+	int sysctl_tcp_plb_enabled;
+	int sysctl_tcp_plb_idle_rehash_rounds;
+	int sysctl_tcp_plb_rehash_rounds;
+	int sysctl_tcp_plb_suspend_rto_sec;
+	int sysctl_tcp_plb_cong_thresh;
+
 	atomic_t	rt_genid;
 	siphash_key_t	ip_id_key;
 };

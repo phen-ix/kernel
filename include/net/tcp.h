@@ -1031,6 +1031,16 @@ struct ack_sample {
  * setting cwnd and pacing rate.
  * A sample is invalid if "delivered" or "interval_us" is negative.
  */
+/* Protective Load Balancing (BBRv3 dependency, Google PLB). */
+struct tcp_plb_state {
+	u32	consec_cong_rounds;
+	u32	pause_until;
+};
+void tcp_plb_update_state(const struct sock *sk, struct tcp_plb_state *plb,
+			  const int cong_ratio);
+void tcp_plb_check_rehash(struct sock *sk, struct tcp_plb_state *plb);
+void tcp_plb_update_state_upon_rto(struct sock *sk, struct tcp_plb_state *plb);
+
 struct rate_sample {
 	u64  prior_mstamp; /* starting timestamp for interval */
 	u32  prior_delivered;	/* tp->delivered at "prior_mstamp" */
@@ -1042,6 +1052,7 @@ struct rate_sample {
 	u32  prior_in_flight;	/* in flight before this ACK */
 	bool is_app_limited;	/* is sample from packet with bubble in pipe? */
 	bool is_retrans;	/* is sample from retransmission? */
+	bool is_ack_delayed;	/* ACK was delayed (BBRv3 PROBE_RTT) */
 };
 
 struct tcp_congestion_ops {
@@ -1070,6 +1081,8 @@ struct tcp_congestion_ops {
 	void (*pkts_acked)(struct sock *sk, const struct ack_sample *sample);
 	/* override sysctl_tcp_min_tso_segs */
 	u32 (*min_tso_segs)(struct sock *sk);
+	/* override TSO segment count (BBRv3 pacing) */
+	u32 (*tso_segs)(struct sock *sk, unsigned int mss_now);
 	/* returns the multiplier used in tcp_sndbuf_expand (optional) */
 	u32 (*sndbuf_expand)(struct sock *sk);
 	/* call when packets are delivered to update cwnd and pacing rate,

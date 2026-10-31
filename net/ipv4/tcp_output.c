@@ -74,6 +74,7 @@ void tcp_mstamp_refresh(struct tcp_sock *tp)
 	if (val > tp->tcp_wstamp_ns)
 		tp->tcp_wstamp_ns = val;
 
+	tp->tcp_clock_cache = val;
 	val = div_u64(val, NSEC_PER_USEC);
 	if (val > tp->tcp_mstamp)
 		tp->tcp_mstamp = val;
@@ -1959,11 +1960,14 @@ static u32 tcp_tso_segs(struct sock *sk, unsigned int mss_now)
 	const struct tcp_congestion_ops *ca_ops = inet_csk(sk)->icsk_ca_ops;
 	u32 min_tso, tso_segs;
 
-	min_tso = ca_ops->min_tso_segs ?
-			ca_ops->min_tso_segs(sk) :
-			sysctl_tcp_min_tso_segs;
-
-	tso_segs = tcp_tso_autosize(sk, mss_now, min_tso);
+	if (ca_ops->tso_segs)
+		tso_segs = ca_ops->tso_segs(sk, mss_now);
+	else {
+		min_tso = ca_ops->min_tso_segs ?
+				ca_ops->min_tso_segs(sk) :
+				sysctl_tcp_min_tso_segs;
+		tso_segs = tcp_tso_autosize(sk, mss_now, min_tso);
+	}
 	return min_t(u32, tso_segs, sk->sk_gso_max_segs);
 }
 
@@ -2789,6 +2793,7 @@ void tcp_send_loss_probe(struct sock *sk)
 	if (WARN_ON(!skb || !tcp_skb_pcount(skb)))
 		goto rearm_timer;
 
+	tp->tlp_orig_data_app_limited = TCP_SKB_CB(skb)->tx.is_app_limited;
 	if (__tcp_retransmit_skb(sk, skb, 1))
 		goto rearm_timer;
 

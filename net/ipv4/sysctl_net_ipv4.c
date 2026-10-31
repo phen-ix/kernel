@@ -30,6 +30,9 @@
 
 static int zero;
 static int one = 1;
+static int thirty_one = 31;
+static int sixty = 60;
+static int two_hundred_fifty_six = 256;
 static int three = 3;
 static int four = 4;
 static int hundred = 100;
@@ -717,6 +720,54 @@ static struct ctl_table ipv4_table[] = {
 };
 
 static struct ctl_table ipv4_net_table[] = {
+#ifdef CONFIG_TCP_CONG_BBR3
+	{
+		.procname	= "tcp_plb_enabled",
+		.data		= &init_net.ipv4.sysctl_tcp_plb_enabled,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &one,
+	},
+	{
+		.procname	= "tcp_plb_idle_rehash_rounds",
+		.data		= &init_net.ipv4.sysctl_tcp_plb_idle_rehash_rounds,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &thirty_one,
+	},
+	{
+		.procname	= "tcp_plb_rehash_rounds",
+		.data		= &init_net.ipv4.sysctl_tcp_plb_rehash_rounds,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &thirty_one,
+	},
+	{
+		.procname	= "tcp_plb_suspend_rto_sec",
+		.data		= &init_net.ipv4.sysctl_tcp_plb_suspend_rto_sec,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &sixty,
+	},
+	{
+		.procname	= "tcp_plb_cong_thresh",
+		.data		= &init_net.ipv4.sysctl_tcp_plb_cong_thresh,
+		.maxlen		= sizeof(int),
+		.mode		= 0644,
+		.proc_handler	= proc_dointvec_minmax,
+		.extra1		= &zero,
+		.extra2		= &two_hundred_fifty_six,
+	},
+#endif
+
 	{
 		.procname	= "icmp_echo_ignore_all",
 		.data		= &init_net.ipv4.sysctl_icmp_echo_ignore_all,

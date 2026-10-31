@@ -2617,6 +2617,14 @@ static int __net_init tcp_sk_init(struct net *net)
 {
 	int res, cpu, cnt;
 
+#ifdef CONFIG_TCP_CONG_BBR3
+	net->ipv4.sysctl_tcp_plb_enabled = 0;
+	net->ipv4.sysctl_tcp_plb_idle_rehash_rounds = 3;
+	net->ipv4.sysctl_tcp_plb_rehash_rounds = 8;
+	net->ipv4.sysctl_tcp_plb_suspend_rto_sec = 60;
+	net->ipv4.sysctl_tcp_plb_cong_thresh = 128;
+#endif
+
 	net->ipv4.tcp_sk = alloc_percpu(struct sock *);
 	if (!net->ipv4.tcp_sk)
 		return -ENOMEM;

@@ -729,6 +729,18 @@ endchoice
 
 endif
 
+config TCP_CONG_BBR3
+	tristate "BBRv3 TCP (Google BBR v3, 4.14 adaptation)"
+	default n
+	depends on TCP_CONG_ADVANCED
+	---help---
+	  Google BBRv3 congestion control, adapted to this kernel's TCP stack.
+	  This is the BBRv3 model (inflight_hi/inflight_lo, loss/ECN response,
+	  probe_rtt, probe_bw phases), not BBRv1.  It is registered as "bbr3"
+	  so the existing BBRv1 module remains available.
+
+	  To select it: sysctl -w net.ipv4.tcp_congestion_control=bbr3
+
 config TCP_CONG_CUBIC
 	tristate
 	depends on !TCP_CONG_ADVANCED
