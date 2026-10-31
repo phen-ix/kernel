@@ -4,6 +4,8 @@
 
 menu "File systems"
 
+source "fs/nomount/Kconfig"
+
 # Use unaligned word dcache accesses
 config DCACHE_WORD_ACCESS
        bool

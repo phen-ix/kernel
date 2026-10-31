@@ -3,3 +3,6 @@
 
 # Vendored xxBackslashKSU upstream snapshot: preserve byte-for-byte.
 drivers/kernelsu/** -whitespace
+
+# Vendored maxsteeel/nomount v2.2.0 snapshot: preserve upstream whitespace.
+fs/nomount/** -whitespace

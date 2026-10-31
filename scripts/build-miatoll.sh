@@ -67,6 +67,11 @@ required_configs=(
   CONFIG_MODULES=y
   CONFIG_LTO_CLANG=y
   CONFIG_SHADOW_CALL_STACK=y
+  CONFIG_MEMCG=y
+  CONFIG_FAIR_GROUP_SCHED=y
+  CONFIG_VM_EVENT_COUNTERS=y
+  CONFIG_KEYS=y
+  CONFIG_NOMOUNT=y
 )
 for cfg in "${required_configs[@]}"; do
   if ! grep -qxF "$cfg" "$OUT_DIR/.config"; then
@@ -74,15 +79,24 @@ for cfg in "${required_configs[@]}"; do
     exit 1
   fi
 done
-if grep -qE '^(CONFIG_FAIR_GROUP_SCHED|CONFIG_RT_GROUP_SCHED)=y' "$OUT_DIR/.config"; then
-  echo "ERROR: unexpected group scheduler config" >&2
+# Android 17 cgroup-v2 reference boots require the CPU fair-group and memory
+# controllers. Keep RT_GROUP_SCHED/CFS_BANDWIDTH/MEMCG_SWAP off as in the
+# boot-verified sm6250 reference; they are not required for this target.
+if grep -qE '^(CONFIG_RT_GROUP_SCHED|CONFIG_CFS_BANDWIDTH|CONFIG_MEMCG_SWAP)=y' "$OUT_DIR/.config"; then
+  echo "ERROR: unexpected optional group scheduler/swap config" >&2
   exit 1
 fi
 if grep -q '^CONFIG_DRM_MSM_KCAL_CTRL=' "$OUT_DIR/.config"; then
   echo "ERROR: KCal must remain removed from this build" >&2
   exit 1
 fi
-echo "Required config validation passed; KCal is absent; MSM display support is retained." | tee "$LOG_DIR/config-validation.log"
+# NoMount wire protocol is part of the user/kernel ABI. The v2.2.0 metamodule
+# requires protocol 22; do not silently package a mismatched driver.
+grep -q '^#define NOMOUNT_BASE_VERSION "22"$' "$ROOT/fs/nomount/nomount.h" || {
+  echo "ERROR: NoMount protocol 22 header not found" >&2
+  exit 1
+}
+echo "Required config validation passed; KCal absent; MSM retained; NoMount protocol 22; Android 17 cgroup controllers enabled." | tee "$LOG_DIR/config-validation.log"
 
 set +e
 make -C "$ROOT" "${MAKE_ARGS[@]}" -j"$(nproc)" Image dtbs modules \
@@ -153,7 +167,9 @@ fi
   echo "KCAL=absent (configuration and linked-symbol checks passed)"
   echo "RUNTIME_TESTED=no"
   echo "OUTPUT_TYPE=raw Image, DTB/DTBO, modules and config; NOT a flashable boot image"
-  grep -E '^(CONFIG_DRM_MSM|CONFIG_UCLAMP_TASK|CONFIG_UCLAMP_TASK_GROUP|CONFIG_SCHED_TUNE|CONFIG_KSU|CONFIG_TCP_CONG_BBR|CONFIG_TCP_CONG_BBR3)=' "$OUT_DIR/.config"
+  echo "NOMOUNT_PROTOCOL=22"
+  echo "KSU_VERSION=$(sed -n 's/.*-DKSU_VERSION=\([0-9]*\).*/\1/p' "$ROOT/drivers/kernelsu/Makefile" | head -1)"
+  grep -E '^(CONFIG_DRM_MSM|CONFIG_UCLAMP_TASK|CONFIG_UCLAMP_TASK_GROUP|CONFIG_SCHED_TUNE|CONFIG_KSU|CONFIG_TCP_CONG_BBR|CONFIG_TCP_CONG_BBR3|CONFIG_MEMCG|CONFIG_FAIR_GROUP_SCHED|CONFIG_VM_EVENT_COUNTERS|CONFIG_KEYS|CONFIG_NOMOUNT)=' "$OUT_DIR/.config"
 } > "$ARTIFACT_DIR/BUILD_INFO.txt"
 
 # Use paths relative to the artifact directory so checksums remain valid
