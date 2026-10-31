@@ -2,6 +2,7 @@
 
 The kernel branch is build-verified only. Before calling it stable, test on a
 recoverable device with a known-good boot image and working fastboot/EDL path.
+Build and download instructions are in `04-build-and-download.md`.
 
 ## Boot / Android
 
@@ -24,16 +25,14 @@ recoverable device with a known-good boot image and working fastboot/EDL path.
 - Confirm schedtune boost still works and is not double-counted.
 - Watch for runaway minimum frequency, idle drain, or CASS placement regressions.
 
-## KCal
+## Display / KCal removed
 
-- Sysfs nodes are under the `kcal_ctrl` platform device:
-  `kcal`, `kcal_enable`, `kcal_min`, `kcal_hue`, `kcal_sat`, `kcal_val`,
-  `kcal_cont`.
-- RGB write format: `R G B` (1..256, neutral 256 256 256).
-- Verify against SDM/LiveDisplay: KCal is combined with userspace PCC/HSIC,
-  not a replacement. Hardware update follows the next SDE CP commit.
-- Test color calibration apps and ROM LiveDisplay together; check for
-  saturation/contrast clipping, panel flicker, or idle-power regressions.
+- KCal integration has been reverted. Do not expect the added `kcal_ctrl`
+  sysfs interface, and do not use KCal configuration apps with this build.
+- Verify normal display boot, blank/unblank, brightness, and the ROM's
+  existing LiveDisplay/color behavior. These remain device-runtime tests.
+- Confirm the final config has no `CONFIG_DRM_MSM_KCAL_CTRL` setting and
+  still has `CONFIG_DRM_MSM=y`.
 
 ## xxBackslashKSU
 

@@ -1,0 +1,68 @@
+# Selected symbols from the fresh KCal-free build
+ffffff801015f2e0 T uclamp_group_init
+ffffff801015f370 T uclamp_eff_value
+ffffff801015f4b0 T uclamp_enqueue
+ffffff801015f7e0 T uclamp_dequeue
+ffffff801015f910 T uclamp_refresh_task
+ffffff801015fd20 T uclamp_update_css
+ffffff8010160f30 T uclamp_validate
+ffffff8010160fa0 T uclamp_setattr
+ffffff80101610c0 T uclamp_fork
+ffffff8010161110 T uclamp_post_fork
+ffffff8010161570 T uclamp_task_util
+ffffff8010161770 T uclamp_latency_sensitive
+ffffff8010161820 T uclamp_css_write
+ffffff8010161bd0 T uclamp_css_show
+ffffff8010161cd0 T uclamp_css_ls_write
+ffffff8010161d60 T uclamp_css_ls_read
+ffffff8010161d90 T uclamp_group_online
+ffffff8010161df0 t uclamp_rq_max_value.llvm.4331944176377294195
+ffffff8010223040 T uclamp_cpuset_group
+ffffff80119b92e0 T ksu_slow_avc_audit
+ffffff80119b9340 T ksu_show_allow_list
+ffffff80119b93c0 T ksu_get_app_profile
+ffffff80119b9450 T ksu_set_app_profile
+ffffff80119b9850 T ksu_is_uid_granted_root
+ffffff80119b9b00 T ksu_uid_should_umount
+ffffff80119b9ca0 T ksu_put_app_profile
+ffffff80119b9ce0 T ksu_get_root_profile
+ffffff80119b9e30 T ksu_put_root_profile
+ffffff80119b9e80 T ksu_get_allow_list
+ffffff80119ba0a0 T ksu_persistent_allow_list
+ffffff80119ba280 T ksu_load_allow_list
+ffffff80119ba920 T ksu_prune_allowlist
+ffffff80119bb280 T ksu_unregister_feature_handler
+ffffff80119bb330 T ksu_get_feature
+ffffff80119bb440 T ksu_set_feature
+ffffff80119bb550 T ksu_feature_is_forced
+ffffff80119bb580 T ksu_feature_apply_forced
+ffffff80119bd340 T ksu_supercall_handle_ioctl
+ffffff80119bd6d0 T ksu_is_su_session_fd
+ffffff80119bd6f0 T ksu_supercall_cleanup_state
+ffffff80119bd700 T ksu_install_fd
+ffffff80119bd800 T ksu_install_su_fd
+ffffff80119bd900 T ksu_handle_sys_reboot
+ffffff80119be3d0 T ksu_install_file_wrapper
+ffffff80119be7d0 T ksu_event_queue_init
+ffffff80119be860 T ksu_event_queue_destroy
+ffffff80119be960 T ksu_event_queue_push
+ffffff80119beb40 T ksu_event_queue_drop
+ffffff80119bebc0 T ksu_event_queue_read
+ffffff80119bf100 T ksu_event_queue_poll
+ffffff80119bf190 T ksu_event_queue_close
+ffffff80119bf1d0 T ksu_event_queue_has_data
+ffffff80119bf240 T ksu_preinit_release
+ffffff80119bf250 T ksu_preinit_init
+ffffff80119bf2a0 T ksu_preinit_exit
+ffffff80119bf2b0 t ksu_selinux_hide_init_thread
+ffffff80119bf830 T ksu_sulog_is_enabled
+ffffff80119bf840 T ksu_sulog_events_init
+ffffff80119bf8d0 T ksu_sulog_fd_init
+ffffff80119bf900 T ksu_sulog_fd_exit
+
+# KCal symbol check
+PASS: no sde_hw_kcal_* or sde_cp_kcal_* symbols
+
+# Congestion-control name strings
+bbr3
+cubic

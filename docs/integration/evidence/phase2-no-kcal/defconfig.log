@@ -1,0 +1,14 @@
+make: Entering directory '/home/user/kernel'
+make[1]: Entering directory '/home/user/kernel/out/miatoll'
+  HOSTCC  scripts/basic/fixdep
+  GEN     ./Makefile
+  HOSTCC  scripts/kconfig/conf.o
+  SHIPPED scripts/kconfig/zconf.tab.c
+  SHIPPED scripts/kconfig/zconf.lex.c
+  HOSTCC  scripts/kconfig/zconf.tab.o
+  HOSTLD  scripts/kconfig/conf
+#
+# configuration written to .config
+#
+make[1]: Leaving directory '/home/user/kernel/out/miatoll'
+make: Leaving directory '/home/user/kernel'

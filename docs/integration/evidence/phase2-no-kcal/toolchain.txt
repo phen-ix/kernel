@@ -1,0 +1,10 @@
+=== Toolchain ===
+Android (11967740, +pgo, +bolt, +lto, +mlgo, based on r522817) clang version 18.0.1 (https://android.googlesource.com/toolchain/llvm-project d8003a456d14a3deb8054cdaa529ffbf02d9b262)
+LLD 18.0.1 (compatible with GNU linkers)
+LLVM (http://llvm.org/):
+flex 2.6.4
+bison (GNU Bison) 3.8.2
+bc 6.5.0
+ARCH=arm64 SUBARCH=arm64 LLVM=1 LLVM_IAS=1
+DEFCONFIG=vendor/xiaomi/miatoll_defconfig
+SOURCE_COMMIT=21eacd34b7c978dd4c12bc030b91702b0c2e6d43

@@ -136,6 +136,38 @@ cp "$OUT_DIR/.config" "$ARTIFACT_DIR/miatoll.config"
 cp "$OUT_DIR/arch/arm64/boot/Image" "$ARTIFACT_DIR/Image"
 cp "$OUT_DIR/arch/arm64/boot/dts/qcom/"*.dtb "$ARTIFACT_DIR/" 2>/dev/null || true
 cp "$OUT_DIR/arch/arm64/boot/dts/qcom/"*.dtbo "$ARTIFACT_DIR/" 2>/dev/null || true
-find "$OUT_DIR" -name '*.ko' -exec cp {} "$ARTIFACT_DIR/" \;
-sha256sum "$ARTIFACT_DIR"/* > "$ARTIFACT_DIR/SHA256SUMS"
+find "$OUT_DIR" -path "$ARTIFACT_DIR" -prune -o -name '*.ko' -exec cp {} "$ARTIFACT_DIR/" \;
+
+# Do not identify a downloadable kernel as KCal-free merely because its
+# defconfig request was removed: check the actually linked symbol table too.
+if grep -Eq ' (sde_hw_kcal_|sde_cp_kcal_)' "$OUT_DIR/System.map"; then
+  echo "ERROR: KCal symbols remain in the linked kernel" >&2
+  exit 1
+fi
+
+{
+  echo "SOURCE_COMMIT=$(git -C "$ROOT" rev-parse HEAD)"
+  echo "DEFCONFIG=$DEFCONFIG"
+  echo "TOOLCHAIN=Android Clang/LLD 18.0.1 (r522817)"
+  echo "BUILD_FLAGS=ARCH=arm64 SUBARCH=arm64 LLVM=1 LLVM_IAS=1"
+  echo "KCAL=absent (configuration and linked-symbol checks passed)"
+  echo "RUNTIME_TESTED=no"
+  echo "OUTPUT_TYPE=raw Image, DTB/DTBO, modules and config; NOT a flashable boot image"
+  grep -E '^(CONFIG_DRM_MSM|CONFIG_UCLAMP_TASK|CONFIG_UCLAMP_TASK_GROUP|CONFIG_SCHED_TUNE|CONFIG_KSU|CONFIG_TCP_CONG_BBR|CONFIG_TCP_CONG_BBR3)=' "$OUT_DIR/.config"
+} > "$ARTIFACT_DIR/BUILD_INFO.txt"
+
+# Use paths relative to the artifact directory so checksums remain valid
+# after download/extraction on another machine. Exclude the checksum file
+# itself, including when an existing output directory is reused.
+(
+  cd "$ARTIFACT_DIR"
+  checksum_inputs=()
+  for artifact in *; do
+    if [[ -f "$artifact" && "$artifact" != SHA256SUMS ]]; then
+      checksum_inputs+=("$artifact")
+    fi
+  done
+  sha256sum -- "${checksum_inputs[@]}" > SHA256SUMS
+  sha256sum -c SHA256SUMS
+)
 echo "Artifacts written to $ARTIFACT_DIR"

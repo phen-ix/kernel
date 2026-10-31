@@ -133,3 +133,6 @@ Android.bp
 # Local integration build/toolchain scratch (Arena)
 .work/
 out/
+
+# Local downloadable packages; repository artifacts are uploaded by CI.
+/downloads/

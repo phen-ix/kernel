@@ -16,7 +16,7 @@ A successful build is not a runtime guarantee.
 | xxBackslashKSU | `backslashxx/KernelSU` | `f8aeac629022114d6b366b17048965a28ff398e8` | exact requested upstream, UAPI v6 |
 | BBRv3 algorithm | `google/bbr` `bbrv3-2025-03-18` | `90210de4b779d40496dee0b89081780eeddf2a60` | BBRv3 model, not BBRv1 |
 | BBRv3 mainline compatibility | `stardock/tcp_bbr_modules` | `45731d211025c30702316590f1f01d7aa59811b9` | compatibility/accessor layer only; reviewed against Google source |
-| KCal | this repo history before revert `f36b29f714` | `a3c762797eee…` / `e4dab6ea6b26…` | restored and reworked; global force-update removed |
+| KCal | removed at the user’s request | Revert of `bd1c180c3` | MSM display sources restored to the pre-integration baseline; no KCal feature is enabled |
 
 ## 1. Pure LLVM build plumbing
 
@@ -90,49 +90,61 @@ Backported/adapted dependencies:
 
 Selection: `sysctl -w net.ipv4.tcp_congestion_control=bbr3`.
 
-## 5. KCal
+## 5. KCal removal
 
-Restored Qualcomm SDE KCal sysfs interface (`kcal`, `kcal_enable`,
-`kcal_min`, `kcal_hue`, `kcal_sat`, `kcal_val`, `kcal_cont`) but removed the
-unsafe global single-CRTC force-update.
+The KCal feature commit `bd1c180c3` was reverted in `21eacd34b` at the
+user's request. This removes the added KCal driver files, Kconfig/Makefile
+entries, SDE color-processing hooks, PCC/HSIC adjustments, and the
+`CONFIG_DRM_MSM_KCAL_CTRL=y` defconfig entry.
 
-Changes:
+The complete `drivers/gpu/drm/msm` tree was compared successfully against
+the pre-integration baseline `4afc6f076`. Normal MSM/SDE display support and
+the ROM's existing display/color paths remain in place. Uclamp,
+xxBackslashKSU, BBRv3, and the Clang 18 workflow are not reverted.
 
-- Per-CRTC tracking of last PCC/HSIC CP properties.
-- Sysfs update replays those properties through `sde_cp_crtc_set_property()`
-  so the existing SDE CP dirty-list/atomic path owns hardware programming.
-- RGB PCC coefficients are scaled in `reg_dmav1_setup_dspp_pccv4()`.
-- HSIC is combined with userspace/SDM LiveDisplay requests rather than
-  replacing them.
+The build validator now rejects an enabled KCal option and still requires
+`CONFIG_DRM_MSM=y`. A fresh out-of-tree build is used for the removal check,
+rather than treating an old KCal-containing output directory as current.
 
-Known limitation: hardware update occurs on the next SDE CP commit; this is
-not a guarantee of immediate visible change without a userspace commit.
-Runtime validation against VoltageOS LiveDisplay/SDM is still required.
+The earlier KCal-enabled build and its successful GitHub Actions run remain
+historical evidence only. Do not use those older artifacts when a KCal-free
+kernel is required. See `04-build-and-download.md` for current build/download
+instructions and artifact identification.
 
-## Verification status (local, 2026-10-31)
+## Verification status — KCal-free build (local, 2026-10-31)
 
-`scripts/build-miatoll.sh` completed with `BUILD_EXIT=0` using the pinned
-Android Clang 18.0.1 / LLD 18.0.1 toolchain, `ARCH=arm64 LLVM=1 LLVM_IAS=1`,
-and `vendor/xiaomi/miatoll_defconfig`.
+A **fresh** `scripts/build-miatoll.sh` run completed with `BUILD_EXIT=0` at
+KCal removal commit `21eacd34b`, using Android Clang/LLD 18.0.1,
+`ARCH=arm64 LLVM=1 LLVM_IAS=1`, and `vendor/xiaomi/miatoll_defconfig`.
+The previous output directory was archived before this build, so this was
+not an incremental relink of a KCal-enabled kernel.
 
-Evidence: `docs/integration/evidence/phase2/`.
+Current evidence: `docs/integration/evidence/phase2-no-kcal/`.
+The superseded KCal-enabled evidence is retained under
+`docs/integration/evidence/phase2-before-kcal-revert/`.
 
-- `vmlinux`: ELF64 AArch64, entry `0xFFFFFF8010080000`.
-- Artifacts: `Image`, `cust-atoll-ab.dtb`, four miatoll DTBOs
-  (curtana/excalibur/gram/joyeuse), `tcp_bic.ko`, `tcp_htcp.ko`, final
-  `.config`, SHA-256 sums.
+- Display source comparison against baseline `4afc6f076`: no differences.
+- Final config: no KCal option; `CONFIG_DRM_MSM=y` retained.
+- Linked `System.map`: no `sde_hw_kcal_*` or `sde_cp_kcal_*` symbols.
+- `vmlinux`: ELF64 AArch64.
+- Artifacts: raw `Image`, one DTB, four miatoll DTBOs, two modules, and the
+  resolved config. These are build outputs, not a flashable boot image.
 - Image SHA-256:
-  `4b411d50d285d60fab801757777b008babd8431b7809ff7ef333c727c4dea27f`
+  `3abe167e9979c87c9691e883c07ba93b024e31e697edc428ef6966ac393d32c0`
 - Final config SHA-256:
-  `16b66e8e8d13c58dc692173fd06d925c8f006cff506f5460f5dd8f686b0005b3`
-- Required feature configs validated; schedtune retained; BBRv1 retained;
-  default TCP congestion control remains CUBIC.
-- First-argv `.cmd` audit: no GNU compiler/linker/binutils fallback
-  (clang 3576, ld.lld 5, llvm-nm 1, llvm-objcopy 2, plus host build helpers).
-- Build log contains 5 pre-existing-style `-Wconstant-logical-operand`
-  warnings from KSU unity-build include paths; no errors. Optional bpfilter
-  userspace tool is skipped as in baseline (`CONFIG_BPFILTER` unset).
+  `08c58a63ca1df2fc2ef9f36fe638acdc022d308f740c0b0757c33f674dfd14b6`
+- Uclamp, schedtune, xxBackslashKSU, BBRv1 and BBRv3 configs remain enabled;
+  the default TCP congestion control remains CUBIC.
+- First-argv `.cmd` audit: clang 3575, ld.lld 5, llvm-nm 1, llvm-objcopy 2;
+  no GNU compiler/linker/binutils fallback.
+- Clean build: no errors; 15 compiler warning lines are preserved in
+  `clean-build.log`. The optional bpfilter userspace tool is skipped as in
+  the baseline (`CONFIG_BPFILTER` unset).
+
+The earlier successful GitHub Actions run 41169050563 was **KCal-enabled**
+and is not evidence for this removal. Use the new branch run identified in
+`04-build-and-download.md` / the delivery message instead.
 
 **No device boot, CTS/VTS, display, root, scheduler, or network runtime test
-has been performed in this environment. This is a build-verified integration
-branch, not a claim of stable runtime behavior.**
+has been performed in this environment. Compilation does not establish
+stable runtime behavior.**
