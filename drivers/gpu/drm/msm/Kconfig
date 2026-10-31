@@ -179,15 +179,6 @@ config DRM_MSM_DSI_14NM_PHY
 	help
 	  Choose this option if DSI PHY on 8996 is used on the platform.
 
-config DRM_MSM_KCAL_CTRL
-	bool "Enable kernel-level color calibration control (KCal)"
-	depends on DRM_MSM
-	default n
-	help
-	  Qualcomm SDE per-CRTC color calibration (RGB PCC + HSIC).
-	  Values are applied through the SDE color-processing dirty-list
-	  path and combined with userspace LiveDisplay/SDM settings.
-
 config DRM_SDE_EVTLOG_DEBUG
 	bool "Enable event logging in MSM DRM"
 	depends on DRM_MSM

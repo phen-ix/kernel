@@ -61,7 +61,7 @@ required_configs=(
   CONFIG_KSU_LSM_SECURITY_HOOKS=y
   CONFIG_TCP_CONG_BBR=y
   CONFIG_TCP_CONG_BBR3=y
-  CONFIG_DRM_MSM_KCAL_CTRL=y
+  CONFIG_DRM_MSM=y
   CONFIG_DEFAULT_TCP_CONG=\"cubic\"
   CONFIG_ARM64=y
   CONFIG_MODULES=y
@@ -78,7 +78,11 @@ if grep -qE '^(CONFIG_FAIR_GROUP_SCHED|CONFIG_RT_GROUP_SCHED)=y' "$OUT_DIR/.conf
   echo "ERROR: unexpected group scheduler config" >&2
   exit 1
 fi
-echo "Required config validation passed." | tee "$LOG_DIR/config-validation.log"
+if grep -q '^CONFIG_DRM_MSM_KCAL_CTRL=' "$OUT_DIR/.config"; then
+  echo "ERROR: KCal must remain removed from this build" >&2
+  exit 1
+fi
+echo "Required config validation passed; KCal is absent; MSM display support is retained." | tee "$LOG_DIR/config-validation.log"
 
 set +e
 make -C "$ROOT" "${MAKE_ARGS[@]}" -j"$(nproc)" Image dtbs modules \

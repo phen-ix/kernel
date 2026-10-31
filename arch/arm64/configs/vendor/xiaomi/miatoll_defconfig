@@ -748,6 +748,3 @@ CONFIG_KSU_HEURISTIC_IN_TREE_BUILD=y
 
 # Genuine Google BBRv3 (selectable as "bbr3"; BBRv1 and CUBIC preserved).
 CONFIG_TCP_CONG_BBR3=y
-
-# Qualcomm SDE KCal (RGB PCC + HSIC), combined with LiveDisplay/SDM.
-CONFIG_DRM_MSM_KCAL_CTRL=y
