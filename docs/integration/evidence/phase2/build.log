@@ -1,0 +1,153 @@
+make: Entering directory '/home/user/kernel'
+make[1]: Entering directory '/home/user/kernel/out/miatoll'
+  GEN     ./Makefile
+scripts/kconfig/conf  --silentoldconfig Kconfig
+  CHK     include/config/kernel.release
+  GEN     ./Makefile
+  CHK     include/generated/uapi/linux/version.h
+  CHK     include/generated/utsrelease.h
+-- KDIR: 
+-- MDIR: /home/user/kernel/drivers/kernelsu
+-- KernelSU Manager package name: me.weishu.kernelsu
+-- KernelSU Manager signature size: 0x033b
+-- KernelSU Manager signature hash: c371061b19d8c7d7d6133c6a9bafe198fa944e50c1b31c9d8daa8d7f1fc2d2d6
+-- KernelSU/compat: iterate_dir found!
+-- KernelSU/compat: f_op->read_iter found!
+/home/user/kernel/net/Makefile:24: CC cannot link executables. Skipping bpfilter.
+  Using /home/user/kernel as source for kernel
+  CHK     scripts/mod/devicetable-offsets.h
+  CHK     include/generated/timeconst.h
+  CHK     include/generated/bounds.h
+  CHK     include/generated/asm-offsets.h
+  CALL    /home/user/kernel/scripts/checksyscalls.sh
+  CHK     include/generated/compile.h
+  CHK     kernel/config_data.h
+  CC      drivers/gpu/drm/msm/sde/sde_color_processing.o
+  CC      drivers/gpu/drm/msm/sde/sde_hw_kcal_ctrl.o
+  AR      drivers/gpu/drm/msm/msm_drm.o
+  AR      drivers/gpu/drm/msm/built-in.a
+  AR      drivers/gpu/drm/built-in.a
+  AR      drivers/gpu/built-in.a
+/home/user/kernel/net/Makefile:24: CC cannot link executables. Skipping bpfilter.
+-- KDIR: 
+-- MDIR: /home/user/kernel/drivers/kernelsu
+-- KernelSU Manager package name: me.weishu.kernelsu
+-- KernelSU Manager signature size: 0x033b
+-- KernelSU Manager signature hash: c371061b19d8c7d7d6133c6a9bafe198fa944e50c1b31c9d8daa8d7f1fc2d2d6
+-- KernelSU/compat: iterate_dir found!
+-- KernelSU/compat: f_op->read_iter found!
+  CC      drivers/kernelsu/ksu.o
+In file included from /home/user/kernel/drivers/kernelsu/ksu.c:21:
+In file included from /home/user/kernel/drivers/kernelsu/kernel_includes.h:37:
+In file included from /home/user/kernel/arch/arm64/include/asm/syscall.h:20:
+In file included from /home/user/kernel/include/linux/compat.h:13:
+In file included from /home/user/kernel/include/linux/stat.h:6:
+In file included from /home/user/kernel/arch/arm64/include/asm/stat.h:23:
+In file included from /home/user/kernel/arch/arm64/include/asm/compat.h:25:
+In file included from /home/user/kernel/include/linux/sched.h:14:
+In file included from /home/user/kernel/include/linux/pid.h:5:
+In file included from /home/user/kernel/include/linux/rculist.h:10:
+In file included from /home/user/kernel/include/linux/list.h:9:
+/home/user/kernel/include/linux/kernel.h:351:58: warning: use of logical '&&' with constant operand [-Wconstant-logical-operand]
+  351 |         if (sizeof(unsigned long) == sizeof(unsigned long long) &&
+      |                                                                 ^
+  352 |             __alignof__(unsigned long) == __alignof__(unsigned long long))
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/kernel/include/linux/kernel.h:351:58: note: use '&' for a bitwise operation
+  351 |         if (sizeof(unsigned long) == sizeof(unsigned long long) &&
+      |                                                                 ^~
+      |                                                                 &
+/home/user/kernel/include/linux/kernel.h:351:58: note: remove constant to silence this warning
+  351 |         if (sizeof(unsigned long) == sizeof(unsigned long long) &&
+      |                                                                 ^~
+  352 |             __alignof__(unsigned long) == __alignof__(unsigned long long))
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/kernel/include/linux/kernel.h:380:40: warning: use of logical '&&' with constant operand [-Wconstant-logical-operand]
+  380 |         if (sizeof(long) == sizeof(long long) &&
+      |                                               ^
+  381 |             __alignof__(long) == __alignof__(long long))
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/kernel/include/linux/kernel.h:380:40: note: use '&' for a bitwise operation
+  380 |         if (sizeof(long) == sizeof(long long) &&
+      |                                               ^~
+      |                                               &
+/home/user/kernel/include/linux/kernel.h:380:40: note: remove constant to silence this warning
+  380 |         if (sizeof(long) == sizeof(long long) &&
+      |                                               ^~
+  381 |             __alignof__(long) == __alignof__(long long))
+      |             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/user/kernel/drivers/kernelsu/ksu.c:21:
+In file included from /home/user/kernel/drivers/kernelsu/kernel_includes.h:38:
+In file included from /home/user/kernel/include/crypto/hash.h:16:
+In file included from /home/user/kernel/include/linux/crypto.h:24:
+/home/user/kernel/include/linux/slab.h:540:13: warning: use of logical '&&' with constant operand [-Wconstant-logical-operand]
+  540 |         if (n == 1 && KMALLOC_MIN_SIZE <= 32)
+      |                    ^  ~~~~~~~~~~~~~~~~~~~~~~
+/home/user/kernel/include/linux/slab.h:540:13: note: use '&' for a bitwise operation
+  540 |         if (n == 1 && KMALLOC_MIN_SIZE <= 32)
+      |                    ^~
+      |                    &
+/home/user/kernel/include/linux/slab.h:540:13: note: remove constant to silence this warning
+  540 |         if (n == 1 && KMALLOC_MIN_SIZE <= 32)
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/kernel/include/linux/slab.h:543:13: warning: use of logical '&&' with constant operand [-Wconstant-logical-operand]
+  543 |         if (n == 2 && KMALLOC_MIN_SIZE <= 64)
+      |                    ^  ~~~~~~~~~~~~~~~~~~~~~~
+/home/user/kernel/include/linux/slab.h:543:13: note: use '&' for a bitwise operation
+  543 |         if (n == 2 && KMALLOC_MIN_SIZE <= 64)
+      |                    ^~
+      |                    &
+/home/user/kernel/include/linux/slab.h:543:13: note: remove constant to silence this warning
+  543 |         if (n == 2 && KMALLOC_MIN_SIZE <= 64)
+      |                    ^~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/user/kernel/drivers/kernelsu/ksu.c:21:
+In file included from /home/user/kernel/drivers/kernelsu/kernel_includes.h:38:
+In file included from /home/user/kernel/include/crypto/hash.h:16:
+In file included from /home/user/kernel/include/linux/crypto.h:26:
+In file included from /home/user/kernel/include/linux/uaccess.h:14:
+In file included from /home/user/kernel/arch/arm64/include/asm/uaccess.h:22:
+In file included from /home/user/kernel/arch/arm64/include/asm/kernel-pgtable.h:22:
+In file included from /home/user/kernel/arch/arm64/include/asm/pgtable.h:754:
+/home/user/kernel/include/asm-generic/pgtable.h:920:49: warning: use of logical '||' with constant operand [-Wconstant-logical-operand]
+  920 |         if (pmd_none(pmdval) || pmd_trans_huge(pmdval) ||
+      |                                                        ^
+  921 |                 (IS_ENABLED(CONFIG_ARCH_ENABLE_THP_MIGRATION) && !pmd_present(pmdval)))
+      |                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/user/kernel/include/asm-generic/pgtable.h:920:49: note: use '|' for a bitwise operation
+  920 |         if (pmd_none(pmdval) || pmd_trans_huge(pmdval) ||
+      |                                                        ^~
+      |                                                        |
+  DTC     arch/arm64/boot/dts/qcom/cust-atoll-ab.dtb
+  DTC     arch/arm64/boot/dts/qcom/curtana-atoll-ab-idp-overlay.dtbo
+  DTC     arch/arm64/boot/dts/qcom/excalibur-atoll-ab-idp-overlay.dtbo
+5 warnings generated.
+  DTC     arch/arm64/boot/dts/qcom/gram-atoll-ab-idp-overlay.dtbo
+  AR      drivers/kernelsu/kernelsu.o
+  AR      drivers/kernelsu/built-in.a
+  DTC     arch/arm64/boot/dts/qcom/joyeuse-atoll-ab-idp-overlay.dtbo
+  AR      drivers/built-in.a
+  GEN     .version
+  CHK     include/generated/compile.h
+  UPD     include/generated/compile.h
+  CC      init/version.o
+  AR      init/built-in.a
+  AR      built-in.a
+  LTO     vmlinux.o
+  MODPOST vmlinux.o
+  KSYM    .tmp_kallsyms1.o
+  KSYM    .tmp_kallsyms2.o
+  LD      vmlinux
+  SORTEX  vmlinux
+  SYSMAP  System.map
+  Building modules, stage 2.
+  OBJCOPY arch/arm64/boot/Image
+  LD [M]  net/ipv4/tcp_bic.lto.o
+  LD [M]  net/ipv4/tcp_htcp.lto.o
+  MODPOST 2 modules
+  CC      net/ipv4/tcp_bic.mod.o
+  CC      net/ipv4/tcp_htcp.mod.o
+  LD [M]  net/ipv4/tcp_bic.ko
+  LD [M]  net/ipv4/tcp_htcp.ko
+make[1]: Leaving directory '/home/user/kernel/out/miatoll'
+make: Leaving directory '/home/user/kernel'
+BUILD_EXIT=0

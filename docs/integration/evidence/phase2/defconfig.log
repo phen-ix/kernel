@@ -1,0 +1,8 @@
+make: Entering directory '/home/user/kernel'
+make[1]: Entering directory '/home/user/kernel/out/miatoll'
+  GEN     ./Makefile
+#
+# configuration written to .config
+#
+make[1]: Leaving directory '/home/user/kernel/out/miatoll'
+make: Leaving directory '/home/user/kernel'
