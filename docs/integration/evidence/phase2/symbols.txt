@@ -1,0 +1,65 @@
+# Selected System.map symbols from local Clang 18 build
+ffffff801015f2e0 T uclamp_group_init
+ffffff801015f370 T uclamp_eff_value
+ffffff801015f4b0 T uclamp_enqueue
+ffffff801015f7e0 T uclamp_dequeue
+ffffff801015f910 T uclamp_refresh_task
+ffffff801015fd20 T uclamp_update_css
+ffffff8010160f30 T uclamp_validate
+ffffff8010160fa0 T uclamp_setattr
+ffffff80101610c0 T uclamp_fork
+ffffff8010161110 T uclamp_post_fork
+ffffff8010161570 T uclamp_task_util
+ffffff8010161770 T uclamp_latency_sensitive
+ffffff8010161820 T uclamp_css_write
+ffffff8010161bd0 T uclamp_css_show
+ffffff8010161cd0 T uclamp_css_ls_write
+ffffff8010161d60 T uclamp_css_ls_read
+ffffff8010161d90 T uclamp_group_online
+ffffff8010161df0 t uclamp_rq_max_value.llvm.16655389397817266206
+ffffff8010223040 T uclamp_cpuset_group
+ffffff8010ba47c0 T sde_hw_kcal_get
+ffffff8010ba47d0 T sde_hw_kcal_hsic_struct
+ffffff8010ba4800 T sde_hw_kcal_pcc_adjust
+ffffff8010ba4850 T sde_hw_kcal_hsic_combine
+ffffff8010ba4910 t sde_hw_kcal_ctrl_probe
+ffffff8010ba49d0 t sde_hw_kcal_ctrl_remove
+ffffff80119bb1c0 T ksu_slow_avc_audit
+ffffff80119bb220 T ksu_show_allow_list
+ffffff80119bb2a0 T ksu_get_app_profile
+ffffff80119bb330 T ksu_set_app_profile
+ffffff80119bb730 T ksu_is_uid_granted_root
+ffffff80119bb9e0 T ksu_uid_should_umount
+ffffff80119bbb80 T ksu_put_app_profile
+ffffff80119bbbc0 T ksu_get_root_profile
+ffffff80119bbd10 T ksu_put_root_profile
+ffffff80119bbd60 T ksu_get_allow_list
+ffffff80119bbf80 T ksu_persistent_allow_list
+ffffff80119bc160 T ksu_load_allow_list
+ffffff80119bc800 T ksu_prune_allowlist
+ffffff80119bd160 T ksu_unregister_feature_handler
+ffffff80119bd210 T ksu_get_feature
+ffffff80119bd320 T ksu_set_feature
+ffffff80119bd430 T ksu_feature_is_forced
+ffffff80119bd460 T ksu_feature_apply_forced
+ffffff80119bf220 T ksu_supercall_handle_ioctl
+ffffff80119bf5b0 T ksu_is_su_session_fd
+ffffff80119bf5d0 T ksu_supercall_cleanup_state
+ffffff80119bf5e0 T ksu_install_fd
+ffffff80119bf6e0 T ksu_install_su_fd
+ffffff80119bf7e0 T ksu_handle_sys_reboot
+ffffff80119c02b0 T ksu_install_file_wrapper
+ffffff80119c06b0 T ksu_event_queue_init
+ffffff80119c0740 T ksu_event_queue_destroy
+ffffff80119c0840 T ksu_event_queue_push
+ffffff80119c0a20 T ksu_event_queue_drop
+ffffff80119c0aa0 T ksu_event_queue_read
+ffffff80119c0fe0 T ksu_event_queue_poll
+ffffff80119c1070 T ksu_event_queue_close
+ffffff80119c10b0 T ksu_event_queue_has_data
+ffffff80119c1120 T ksu_preinit_release
+ffffff80119c1130 T ksu_preinit_init
+
+# Congestion-control name strings present in vmlinux
+bbr3
+cubic
